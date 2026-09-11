@@ -1,7 +1,5 @@
-const API_URL = "https://text.pollinations.ai/openai";
-const MODEL_ID = "openai-fast";
-const MODEL_LABEL = "Pollinations openai-fast · GPT-OSS 20B";
-const MAX_TOKENS = 520;
+const API_URL = "https://writing-skill-api.vercel.app/api/generate";
+const MODEL_LABEL = "Vercel AI Gateway · Ling 3.0 Flash";
 const REQUEST_TIMEOUT_MS = 90000;
 
 const EXAMPLES = {
@@ -57,17 +55,6 @@ function clean(text) {
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
     .replace(/<\|im_end\|>/g, "")
     .trim();
-}
-
-function extractContent(value) {
-  if (typeof value === "string") return clean(value);
-  if (Array.isArray(value)) {
-    return clean(value.map((part) => {
-      if (typeof part === "string") return part;
-      return part?.text ?? part?.content ?? "";
-    }).join(""));
-  }
-  return "";
 }
 
 function setStage(stage, state, status) {
@@ -136,38 +123,46 @@ function hybridDraftMessages(brief) {
   ];
 }
 
+function readableError(data, raw, status) {
+  if (typeof data?.error === "string") {
+    if (typeof data?.detail === "string" && data.detail) {
+      return `${data.error} ${data.detail}`.slice(0, 320);
+    }
+    return data.error;
+  }
+  if (typeof data?.detail === "string") return data.detail.slice(0, 320);
+  if (raw) return raw.slice(0, 320);
+  return `HTTP ${status}`;
+}
+
 async function hostedGenerate(messages, onText) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  backendStatus.textContent = `Generating with ${MODEL_LABEL}… no sign-in required.`;
+  backendStatus.textContent = `Generating with ${MODEL_LABEL}…`;
 
   try {
     const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL_ID,
-        messages,
-        temperature: 0,
-        seed: 42,
-        max_tokens: MAX_TOKENS,
-        reasoning_effort: "minimal",
-        stream: false,
-      }),
+      body: JSON.stringify({ messages }),
       signal: controller.signal,
     });
 
+    const raw = await response.text();
+    let data = null;
+    try {
+      data = JSON.parse(raw);
+    } catch (_) {}
+
     if (!response.ok) {
-      const detail = clean(await response.text());
-      throw new Error(`Hosted model returned ${response.status}${detail ? `: ${detail.slice(0, 180)}` : ""}`);
+      throw new Error(`Hosted model returned ${response.status}: ${readableError(data, raw, response.status)}`);
     }
 
-    const data = await response.json();
-    const text = extractContent(data?.choices?.[0]?.message?.content);
+    const text = clean(data?.text);
     if (!text) throw new Error("The hosted model returned no text.");
 
     if (onText) onText(text);
-    backendStatus.textContent = `${MODEL_LABEL} · anonymous hosted inference · no account required.`;
+    backendStatus.textContent = `${MODEL_LABEL} · server-side inference · no reader sign-in required.`;
     return text;
   } catch (error) {
     if (error?.name === "AbortError") {
@@ -262,5 +257,5 @@ briefEl.addEventListener("input", () => {
   resetFromBrief();
 });
 
-backendStatus.textContent = `${MODEL_LABEL} · anonymous hosted inference · no account required.`;
+backendStatus.textContent = `${MODEL_LABEL} · server-side inference · no reader sign-in required.`;
 resetFromBrief();
