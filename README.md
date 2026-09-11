@@ -41,13 +41,9 @@ The useful comparison is not simply which version sounds more polished. Look at 
 
 The Hugging Face Space is a **static page**. It does not run a model on Hugging Face CPU or ZeroGPU, and readers do not download a model into their browser.
 
-Generation is handled in the browser through [Puter.js](https://puter.com/). The playground currently uses:
+Generation is sent directly from the page to Pollinations' anonymous text API. The playground currently fixes the backend to `openai-fast`, which Pollinations lists as an anonymous-tier GPT-OSS 20B model. The same model, temperature, seed, token budget, and reasoning setting are used for every stage in a comparison.
 
-`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`
-
-Puter currently lists that route at $0 for input and output. The same model and generation settings are used for every stage in a comparison.
-
-Puter may ask a visitor to sign in so it can associate AI usage with that person's account. There is no Puter API key stored in this repository and no inference server for the project owner to fund or maintain.
+There is no playground account or API key to configure. Because generation is handled by an external service, do not use the public playground for private or sensitive writing. Anonymous public endpoints can also be rate-limited or changed by their provider.
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
 
@@ -85,7 +81,7 @@ python -m http.server 8000
 
 Then open `http://localhost:8000/demo/static/`.
 
-Generation still goes through Puter.js, so the local page does not need model weights or an API key.
+Generation still goes through the same anonymous hosted model API, so the local page does not need model weights or an API key.
 
 ## Deployment
 
