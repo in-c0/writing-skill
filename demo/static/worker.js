@@ -1,8 +1,8 @@
 import { pipeline, TextStreamer } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
 
 // 360M is materially more coherent than the 135M variant for this qualitative
-// writing comparison. We deliberately omit `device` when creating the pipeline:
-// Transformers.js then uses its browser-compatible CPU/WASM backend by default.
+// writing comparison. We deliberately omit `device` so Transformers.js uses its
+// browser-compatible CPU/WASM backend without requiring WebGPU.
 const MODEL_ID = 'onnx-community/SmolLM2-360M-Instruct-ONNX';
 let generator = null;
 let loadingPromise = null;
@@ -17,10 +17,7 @@ function normalizedProgress(value) {
 }
 
 async function createGenerator() {
-  post('model-status', { message: 'Loading the writing model with CPU/WASM compatibility mode…' });
-
-  // No `device` option here on purpose. Per Transformers.js browser behavior,
-  // WASM/CPU is the default and works without WebGPU flags or a GPU adapter.
+  post('model-status', { message: 'Loading the writing model with CPU/WASM…' });
   const instance = await pipeline('text-generation', MODEL_ID, {
     dtype: 'q4',
     progress_callback: (info) => {
@@ -32,7 +29,6 @@ async function createGenerator() {
       });
     },
   });
-
   return instance;
 }
 
@@ -79,10 +75,10 @@ async function generate({ requestId, messages, maxNewTokens }) {
     },
   });
 
+  // Greedy decoding is both deterministic and cheaper than sampling/beam search.
   const result = await generator(messages, {
     max_new_tokens: maxNewTokens,
     do_sample: false,
-    repetition_penalty: 1.04,
     streamer,
   });
 
