@@ -143,7 +143,7 @@ def compare(user_prompt: str, max_new_tokens: int):
     return baseline, rules_first, draft_then_review, hybrid
 
 
-DEFAULT_BRIEF = """Write a short introduction for a practical book that helps people understand and use English vocabulary in the technology industry. The audience includes students and working professionals. Keep it welcoming, useful, and easy to read."""
+DEFAULT_BRIEF = """Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read."""
 
 with gr.Blocks(title="Writing Skill Approach Lab") as demo:
     gr.Markdown(
