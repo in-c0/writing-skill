@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Writing Skill Approach Lab</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">writing-skill · interactive experiment</p>
+      <h1>Writing Skill Approach Lab</h1>
+      <p class="lede">Give the same brief to the same local model and compare four ways of applying the writing rulebook.</p>
+      <div class="badges">
+        <span>Runs in your browser</span>
+        <span>No API key</span>
+        <span>Deterministic decoding</span>
+      </div>
+    </header>
+
+    <section class="panel controls">
+      <label for="brief">Writing brief</label>
+      <textarea id="brief" rows="8">Write a short introduction for a practical book that helps people understand and use English vocabulary in the technology industry. The audience includes students and working professionals. Keep it welcoming, useful, and easy to read.</textarea>
+
+      <div class="control-row">
+        <label class="token-control" for="tokens">
+          <span>Max new tokens</span>
+          <input id="tokens" type="number" min="80" max="500" step="20" value="260" />
+        </label>
+        <button id="run" type="button">Compare approaches</button>
+      </div>
+
+      <div class="status-wrap" aria-live="polite">
+        <div id="status">Ready. The model downloads on the first run and is cached by your browser.</div>
+        <progress id="progress" max="100" value="0" hidden></progress>
+      </div>
+    </section>
+
+    <section class="methods" aria-label="Experiment conditions">
+      <article><strong>Baseline</strong><span>No added writing-style instructions.</span></article>
+      <article><strong>Rules first</strong><span>Full rulebook before drafting.</span></article>
+      <article><strong>Draft → review</strong><span>Exact baseline revised against the rulebook.</span></article>
+      <article><strong>Hybrid</strong><span>Core principles first, then full review.</span></article>
+    </section>
+
+    <section class="results" aria-label="Generated outputs">
+      <article class="result-card">
+        <div class="result-head"><h2>Baseline</h2><button class="copy" data-target="baseline">Copy</button></div>
+        <pre id="baseline" class="output">Run the experiment to generate this version.</pre>
+      </article>
+      <article class="result-card">
+        <div class="result-head"><h2>Rules first</h2><button class="copy" data-target="rules">Copy</button></div>
+        <pre id="rules" class="output">Run the experiment to generate this version.</pre>
+      </article>
+      <article class="result-card">
+        <div class="result-head"><h2>Draft → review</h2><button class="copy" data-target="review">Copy</button></div>
+        <pre id="review" class="output">Run the experiment to generate this version.</pre>
+      </article>
+      <article class="result-card">
+        <div class="result-head"><h2>Hybrid</h2><button class="copy" data-target="hybrid">Copy</button></div>
+        <pre id="hybrid" class="output">Run the experiment to generate this version.</pre>
+      </article>
+    </section>
+
+    <section class="panel notes">
+      <h2>What to compare</h2>
+      <p>Do not ask only which version is more polished. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.</p>
+      <p><strong>Experimental detail:</strong> Draft → review starts from the exact Baseline output generated in the same run. The model and decoding settings stay fixed; the prompting workflow is what changes.</p>
+      <p class="model-note">Model: <a href="https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX" target="_blank" rel="noreferrer">SmolLM2-360M-Instruct ONNX</a>, quantized for in-browser inference with Transformers.js.</p>
+    </section>
+
+    <footer>
+      <a href="https://github.com/in-c0/writing-skill" target="_blank" rel="noreferrer">View the rulebook on GitHub</a>
+    </footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
