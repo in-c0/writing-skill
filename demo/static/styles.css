@@ -53,6 +53,31 @@ textarea { resize: vertical; min-height: 170px; padding: 14px; line-height: 1.55
 input { padding: 10px 12px; }
 textarea:focus, input:focus { outline: 2px solid #6366f1; outline-offset: 1px; }
 
+.example-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.example-label {
+  margin-right: 2px;
+  color: #9fa9c4;
+  font-size: 13px;
+  font-weight: 700;
+}
+.example {
+  padding: 7px 10px;
+  border: 1px solid #303a5d;
+  border-radius: 999px;
+  background: #0c1120;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 650;
+}
+.example:hover { border-color: #6366f1; background: #11182b; }
+.example.active { border-color: #818cf8; background: rgba(99, 102, 241, .18); color: #eef2ff; }
+
 .control-row { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin-top: 14px; }
 .token-control { width: 180px; margin: 0; }
 .token-control span { display: block; font-size: 13px; margin-bottom: 7px; color: #b8c0d9; }
@@ -88,6 +113,10 @@ progress { width: 100%; margin-top: 8px; height: 7px; }
 .result-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #202945; }
 .result-head h2 { margin: 0; font-size: 16px; }
 .output { margin: 0; padding: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font: 14px/1.62 ui-sans-serif, system-ui, sans-serif; color: #dfe5f7; min-height: 310px; }
+.output[data-state="waiting"] { color: #8f99b5; }
+.output[data-state="running"] { color: #a5b4fc; }
+.output[data-state="streaming"] { color: #dfe5f7; }
+.output[data-state="error"] { color: #fca5a5; }
 
 .notes { margin-top: 18px; padding: 20px 22px; color: #b8c0d9; line-height: 1.6; }
 .notes h2 { color: #eef2ff; margin-top: 0; }
@@ -104,4 +133,5 @@ footer { padding: 24px 2px 0; font-size: 13px; color: #8f99b5; }
   .methods { grid-template-columns: 1fr; }
   .control-row { align-items: stretch; flex-direction: column; }
   .token-control, #run { width: 100%; }
+  .example-label { width: 100%; }
 }
