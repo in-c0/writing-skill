@@ -38,7 +38,9 @@ The lab compares four ways of applying the same writing skill to the same brief 
 | **Draft → review** | The exact baseline draft is reviewed against the rulebook and minimally corrected. |
 | **Hybrid** | Core principles guide the first draft, then the full rulebook is used for review. |
 
-The public demo runs `onnx-community/SmolLM2-360M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The first run downloads the quantized model; the browser cache is reused afterward.
+The public demo runs `onnx-community/SmolLM2-135M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The first run downloads about 180 MB of quantized model data; the browser cache is reused afterward.
+
+Inference runs inside a Web Worker and streams partial text back to the page, so the interface stays responsive during generation. The demo includes several unrelated example briefs—community garden, science explainer, workplace update, and repair-café introduction—or readers can enter their own.
 
 The goal is not to prove that one workflow always wins. Try different briefs and compare the actual writing. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
 
