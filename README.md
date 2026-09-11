@@ -23,6 +23,44 @@ The skill is especially useful for:
 - [`SKILL.md`](./SKILL.md) — canonical agent-facing rulebook.
 - [`CHECKLIST.md`](./CHECKLIST.md) — compact preflight and revision checklist.
 - [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) — adaptation rules for written vs spoken versions, equations, code, diagrams, tables, figures, companion material, and alternative rule-application workflows.
+- [`demo/app.py`](./demo/app.py) — interactive Hugging Face / Gradio comparison playground.
+
+## Interactive approach lab
+
+The repository includes a small experiment for comparing four ways of applying the same writing skill to the same brief using the **same model and deterministic decoding**.
+
+| Approach | What changes |
+| --- | --- |
+| **Baseline** | No added writing-style instructions. |
+| **Rules first** | The full rulebook is supplied before the model writes. |
+| **Draft → review** | The exact baseline draft is reviewed against the rulebook and minimally corrected. |
+| **Hybrid** | Core principles guide the first draft, then the full rulebook is used for review. |
+
+The default demo model is [`Qwen/Qwen2.5-1.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct). The model can be changed with the `MODEL_ID` environment variable.
+
+The goal is not to prove that one workflow always wins. Try different briefs and compare the actual writing. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
+
+Because **Draft → review** starts from the exact baseline produced in the same run, it gives a particularly direct view of what the rulebook changes after generation.
+
+### Run the lab locally
+
+```bash
+git clone https://github.com/in-c0/writing-skill.git
+cd writing-skill
+pip install -r demo/requirements.txt
+python demo/app.py
+```
+
+### Publish it as a Hugging Face Space
+
+The repo includes [`demo/deploy_to_hf.py`](./demo/deploy_to_hf.py) and a GitHub Actions workflow at [`.github/workflows/deploy-hf-space.yml`](./.github/workflows/deploy-hf-space.yml).
+
+The repository owner only needs to configure:
+
+- GitHub secret `HF_TOKEN` — a Hugging Face token with permission to create/update the Space.
+- GitHub variable `HF_SPACE_REPO` — for example `your-hf-name/writing-skill-approach-lab`.
+
+The workflow creates the Space if necessary and uploads the app, rulebook, and checklist. After the first deployment, add the public Space link here so readers can open the playground directly from the README.
 
 ## What this skill tries to prevent
 
