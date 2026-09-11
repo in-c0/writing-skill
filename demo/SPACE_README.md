@@ -21,10 +21,12 @@ The first output is a normal baseline with no added writing instructions. After 
 
 Read each result before continuing. The useful question is not simply which version sounds more polished. Look for writing that is easier to follow, concrete where it should be concrete, natural in rhythm, and appropriate to the reader.
 
-This Space is static. It does not run a model on Hugging Face CPU or ZeroGPU, and it does not download model weights to the reader's computer.
+This Space is static. It does not use Hugging Face CPU or ZeroGPU for inference, and it does not download model weights to the reader's computer.
 
-Generation is sent to Pollinations' anonymous text API using its `openai-fast` route, currently listed as an anonymous-tier GPT-OSS 20B model. No playground sign-in or API key is required. The same model and generation settings are used throughout one comparison.
+Generation is handled by a small Vercel serverless endpoint owned by this project. The endpoint calls Vercel AI Gateway with server-side deployment identity, so readers do not need to sign in or provide an API key.
+
+The current model is `inclusionai/ling-3.0-flash`. Reasoning is disabled for this writing comparison, and the same model and generation settings are used throughout one run.
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with this Space and are used to build the Rules-first and review prompts.
 
-The generation backend is an external public service. Do not submit private or sensitive writing, and expect that anonymous public endpoints can occasionally be rate-limited or changed by their provider.
+Hosted inference still has owner-side credits and limits. The backend caps request size and output length, and availability depends on the project's Vercel AI Gateway allowance. Do not submit private or sensitive writing to this public playground.
