@@ -27,7 +27,7 @@ For most writing tasks, read `SKILL.md` before drafting and use `CHECKLIST.md` b
 
 ## Try the workflows
 
-There is no assumption that one prompting method will always work best. The playground keeps the brief and model fixed and lets you move through the approaches one at a time.
+There is no assumption that one prompting method will always work best. The playground keeps the writing brief and model fixed and lets you move through the approaches one at a time.
 
 The first output is a **baseline** with no added writing instructions. After that you can try:
 
@@ -39,13 +39,17 @@ The useful comparison is not simply which version sounds more polished. Look at 
 
 ## How the playground runs
 
-The Hugging Face Space is a **static page**. It does not run a model on Hugging Face CPU or ZeroGPU, and readers do not download a model into their browser.
+The Hugging Face Space is a **static interface**. It does not run a model on Hugging Face CPU or ZeroGPU, and readers do not download model weights into their browser.
 
-Generation is sent directly from the page to Pollinations' anonymous text API. The playground currently fixes the backend to `openai-fast`, which Pollinations lists as an anonymous-tier GPT-OSS 20B model. The same model, temperature, seed, token budget, and reasoning setting are used for every stage in a comparison.
+When the reader generates a version, the page sends the prompt to the project's small Vercel serverless endpoint. That endpoint calls Vercel AI Gateway using Vercel's deployment identity, so no inference credential is exposed in the browser and the reader does not need to sign in.
 
-There is no playground account or API key to configure. Because generation is handled by an external service, do not use the public playground for private or sensitive writing. Anonymous public endpoints can also be rate-limited or changed by their provider.
+The playground currently uses `inclusionai/ling-3.0-flash` with a fixed temperature and output limit, with reasoning disabled. The same backend and generation settings are used for every stage in one comparison.
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
+
+Hosted inference is paid or quota-limited infrastructure even when the public interface is free to use. Availability therefore depends on the project owner's Vercel AI Gateway credits and limits. The backend has input and output caps so a public demo cannot submit arbitrarily large requests.
+
+Because writing submitted to the playground is sent to hosted inference, do not use the public demo for private or sensitive text.
 
 ## Written, spoken, and visual versions
 
@@ -64,14 +68,17 @@ SKILL.md                         main writing rulebook
 CHECKLIST.md                     compact review checklist
 AGENTS.md                        instructions for agents
 extensions/WRITTEN_SPOKEN.md    written / spoken / visual adaptation
-demo/static/                     static playground
+demo/static/                     static Hugging Face playground
 demo/SPACE_README.md             Hugging Face Space description
-demo/deploy_to_hf.py             deployment script
+demo/deploy_to_hf.py             static Space deployment script
+api/generate.js                  Vercel serverless inference endpoint
+package.json                     Vercel backend dependency metadata
+vercel.json                      Vercel function configuration
 ```
 
 ## Run the playground locally
 
-The playground is a static site. Serve the repository over HTTP and open the demo directory:
+Serve the repository over HTTP and open the demo directory:
 
 ```bash
 git clone https://github.com/in-c0/writing-skill.git
@@ -81,18 +88,28 @@ python -m http.server 8000
 
 Then open `http://localhost:8000/demo/static/`.
 
-Generation still goes through the same anonymous hosted model API, so the local page does not need model weights or an API key.
+The local interface still sends generation requests to the hosted Vercel endpoint; it does not download a model.
 
 ## Deployment
 
+### Hugging Face interface
+
 Changes to `SKILL.md`, `CHECKLIST.md`, or `demo/` automatically redeploy the static Hugging Face Space through GitHub Actions.
 
-The repository uses two GitHub Actions settings:
+The repository uses two GitHub Actions settings for that deployment:
 
 - secret `HF_TOKEN` — a Hugging Face token that can update the Space;
 - variable `HF_SPACE_REPO` — the target Space repository.
 
-The deploy script uploads the static interface together with the current rulebook files. It does not request Hugging Face compute hardware.
+The Space deployment uploads the static interface together with the current rulebook files. It does not request Hugging Face compute hardware.
+
+### Generation backend
+
+`api/generate.js` is deployed as a Vercel Function. It authenticates to Vercel AI Gateway with Vercel OIDC, validates incoming chat messages, applies request-size limits, and returns only the generated text and model identifier to the browser.
+
+The production endpoint used by the playground is:
+
+`https://writing-skill-api.vercel.app/api/generate`
 
 ## License
 
