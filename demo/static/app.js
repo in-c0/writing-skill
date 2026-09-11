@@ -1,9 +1,5 @@
-import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
-
-const BACKENDS = [
-  { id: "openbmb/MiniCPM5-2B-Demo", label: "OpenBMB MiniCPM5-2B" },
-  { id: "openbmb/MiniCPM5-1B-Demo", label: "OpenBMB MiniCPM5-1B" },
-];
+const MODEL_ID = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
+const MAX_TOKENS = 520;
 
 const EXAMPLES = {
   garden: "Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.",
@@ -31,8 +27,6 @@ const buttons = {
 
 let skill = "";
 let checklist = "";
-let client = null;
-let activeBackend = null;
 let baseline = "";
 let baselineBrief = "";
 
@@ -107,61 +101,72 @@ function hybridDraftPrompt(brief) {
   return `Use these core writing principles while drafting. Return only the finished writing.\n\n${CORE}\n\nWRITING BRIEF\n${brief}`;
 }
 
-async function submitWithClient(targetClient, message, onText) {
-  const job = targetClient.submit("/predict", {
-    message,
-    history: [],
-    thinking_mode: false,
-    temperature: 0.2,
-    top_p: 0.9,
-  });
-
-  let latest = "";
-  for await (const event of job) {
-    if (event.type === "data" && event.data) {
-      latest = clean(event.data[0]);
-      if (latest && onText) onText(latest);
-    } else if (event.type === "status" && event.stage === "error") {
-      throw new Error(event.message || "Hosted generation failed.");
-    }
-  }
-  if (!latest) throw new Error("The hosted model returned no text.");
-  return latest;
+function responseText(response) {
+  return clean(
+    response?.message?.content ??
+    response?.text ??
+    response?.content ??
+    response
+  );
 }
 
-async function selectBackend(message, onText) {
-  let lastError = null;
-  for (const backend of BACKENDS) {
-    try {
-      backendStatus.textContent = `Connecting to ${backend.label}…`;
-      const candidate = await Client.connect(backend.id, { events: ["data", "status"] });
-      const text = await submitWithClient(candidate, message, onText);
-      client = candidate;
-      activeBackend = backend;
-      backendStatus.textContent = `Using ${backend.label} · public Hugging Face ZeroGPU Space.`;
+async function puterGenerate(prompt, onText) {
+  if (!globalThis.puter?.ai?.chat) {
+    throw new Error("Puter.js did not load. Reload the page and try again.");
+  }
+
+  backendStatus.textContent = "Generating with the hosted free model… Puter may ask you to sign in once.";
+
+  try {
+    const stream = await puter.ai.chat(prompt, {
+      model: MODEL_ID,
+      stream: true,
+      max_tokens: MAX_TOKENS,
+      temperature: 0,
+    });
+
+    let text = "";
+    for await (const part of stream) {
+      if (part?.text) {
+        text += part.text;
+        const cleaned = clean(text);
+        if (cleaned && onText) onText(cleaned);
+      }
+    }
+
+    text = clean(text);
+    if (text) {
+      backendStatus.textContent = "Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route.";
       return text;
-    } catch (error) {
-      console.warn(`${backend.id} failed`, error);
-      lastError = error;
     }
+  } catch (streamError) {
+    console.warn("Streaming generation failed; retrying once without streaming.", streamError);
   }
-  throw new Error(`No public model backend was available. ${lastError?.message || "Try again later."}`);
-}
 
-async function remoteGenerate(message, onText) {
-  if (!client || !activeBackend) return selectBackend(message, onText);
-  return submitWithClient(client, message, onText);
+  const response = await puter.ai.chat(prompt, {
+    model: MODEL_ID,
+    stream: false,
+    max_tokens: MAX_TOKENS,
+    temperature: 0,
+  });
+  const text = responseText(response);
+  if (!text) throw new Error("The hosted model returned no text.");
+  if (onText) onText(text);
+  backendStatus.textContent = "Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route.";
+  return text;
 }
 
 async function runStage(stage, work) {
   buttons[stage].disabled = true;
-  setStage(stage, "running", "Generating on the hosted model…");
+  setStage(stage, "running", "Generating…");
   try {
     await work();
     setStage(stage, "complete", "Complete.");
   } catch (error) {
     console.error(error);
-    setStage(stage, "error", error?.message || String(error));
+    const message = error?.message || String(error);
+    setStage(stage, "error", message);
+    backendStatus.textContent = message;
     buttons[stage].disabled = false;
   }
 }
@@ -171,7 +176,7 @@ buttons.baseline.addEventListener("click", async () => {
   if (!brief) return;
   await loadRules();
   await runStage("baseline", async () => {
-    baseline = await remoteGenerate(baselinePrompt(brief), (text) => output("baseline", text));
+    baseline = await puterGenerate(baselinePrompt(brief), (text) => output("baseline", text));
     baselineBrief = brief;
     output("baseline", baseline);
     unlock("rules", "Ready. Generate a fresh answer with the rules supplied first.");
@@ -182,7 +187,7 @@ buttons.baseline.addEventListener("click", async () => {
 buttons.rules.addEventListener("click", async () => {
   const brief = briefEl.value.trim();
   await runStage("rules", async () => {
-    const text = await remoteGenerate(rulesPrompt(brief), (value) => output("rules", value));
+    const text = await puterGenerate(rulesPrompt(brief), (value) => output("rules", value));
     output("rules", text);
     unlock("review", "Ready. Revise the exact baseline against the rulebook.");
     $("stage-review").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -196,7 +201,7 @@ buttons.review.addEventListener("click", async () => {
     return;
   }
   await runStage("review", async () => {
-    const text = await remoteGenerate(reviewPrompt(brief, baseline), (value) => output("review", value));
+    const text = await puterGenerate(reviewPrompt(brief, baseline), (value) => output("review", value));
     output("review", text);
     unlock("hybrid", "Ready. Draft with core principles, then review that draft.");
     $("stage-hybrid").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -208,13 +213,15 @@ buttons.hybrid.addEventListener("click", async () => {
   buttons.hybrid.disabled = true;
   setStage("hybrid", "running", "Phase 1/2 · drafting with core principles…");
   try {
-    const draft = await remoteGenerate(hybridDraftPrompt(brief), (value) => output("hybrid", value));
+    const draft = await puterGenerate(hybridDraftPrompt(brief), (value) => output("hybrid", value));
     setStage("hybrid", "running", "Phase 2/2 · reviewing that draft against the full rulebook…");
-    const finalText = await remoteGenerate(reviewPrompt(brief, draft), (value) => output("hybrid", value));
+    const finalText = await puterGenerate(reviewPrompt(brief, draft), (value) => output("hybrid", value));
     output("hybrid", finalText);
     setStage("hybrid", "complete", "Complete. You now have all four versions to compare.");
   } catch (error) {
-    setStage("hybrid", "error", error?.message || String(error));
+    const message = error?.message || String(error);
+    setStage("hybrid", "error", message);
+    backendStatus.textContent = message;
     buttons.hybrid.disabled = false;
   }
 });
@@ -232,4 +239,5 @@ briefEl.addEventListener("input", () => {
   resetFromBrief();
 });
 
+backendStatus.textContent = "Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route. No Hugging Face inference quota is used.";
 resetFromBrief();
