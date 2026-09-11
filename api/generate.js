@@ -1,6 +1,9 @@
+import { getVercelOidcToken } from '@vercel/oidc';
+
 const MODEL_ID = "inclusionai/ling-3.0-flash";
-const MAX_PROMPT_CHARS = 30000;
+const MAX_INPUT_CHARS = 30000;
 const MAX_OUTPUT_TOKENS = 700;
+const ALLOWED_ROLES = new Set(["system", "user", "assistant"]);
 
 function setCors(req, res) {
   const origin = req.headers.origin || "";
@@ -17,43 +20,56 @@ function setCors(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
+function validateMessages(value) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 12) {
+    throw new Error("Expected between 1 and 12 chat messages.");
+  }
+
+  let total = 0;
+  const messages = value.map((message) => {
+    const role = String(message?.role || "");
+    const content = String(message?.content || "").trim();
+    if (!ALLOWED_ROLES.has(role) || !content) {
+      throw new Error("Each message needs a valid role and non-empty text content.");
+    }
+    total += content.length;
+    return { role, content };
+  });
+
+  if (total > MAX_INPUT_CHARS) {
+    throw new Error(`Input is too long. Maximum ${MAX_INPUT_CHARS.toLocaleString()} characters.`);
+  }
+  return messages;
+}
+
 export default async function handler(req, res) {
   setCors(req, res);
 
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
+  if (req.method === "OPTIONS") return res.status(204).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const prompt = String(req.body?.prompt || "").trim();
-  if (!prompt) {
-    return res.status(400).json({ error: "Missing prompt" });
-  }
-  if (prompt.length > MAX_PROMPT_CHARS) {
-    return res.status(400).json({ error: `Prompt is too long. Maximum ${MAX_PROMPT_CHARS.toLocaleString()} characters.` });
-  }
-
-  const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
-  if (!token) {
-    return res.status(500).json({ error: "AI Gateway authentication is not available on this deployment." });
+  let messages;
+  try {
+    messages = validateMessages(req.body?.messages);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
 
   try {
+    const token = process.env.AI_GATEWAY_API_KEY || await getVercelOidcToken();
     const upstream = await fetch("https://ai-gateway.vercel.sh/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         model: MODEL_ID,
-        messages: [{ role: "user", content: prompt }],
+        messages,
         temperature: 0.2,
         max_tokens: MAX_OUTPUT_TOKENS,
-      }),
+        reasoning: { effort: "none" }
+      })
     });
 
     const body = await upstream.text();
@@ -61,23 +77,20 @@ export default async function handler(req, res) {
       return res.status(upstream.status).json({
         error: "Hosted generation failed.",
         upstreamStatus: upstream.status,
-        detail: body.slice(0, 1200),
+        detail: body.slice(0, 1200)
       });
     }
 
-    let data;
-    try {
-      data = JSON.parse(body);
-    } catch {
-      return res.status(502).json({ error: "AI Gateway returned an unreadable response." });
-    }
-
+    const data = JSON.parse(body);
     const text = data?.choices?.[0]?.message?.content;
     if (!text || typeof text !== "string") {
       return res.status(502).json({ error: "AI Gateway returned no text." });
     }
 
-    return res.status(200).json({ text: text.trim(), model: MODEL_ID });
+    return res.status(200).json({
+      text: text.trim(),
+      model: MODEL_ID
+    });
   } catch (error) {
     return res.status(502).json({ error: error?.message || String(error) });
   }
