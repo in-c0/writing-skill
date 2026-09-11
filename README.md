@@ -34,17 +34,21 @@ The lab compares four ways of applying the same writing skill to the same brief 
 | Approach | What changes |
 | --- | --- |
 | **Baseline** | No added writing-style instructions. |
-| **Rules first** | The full rulebook is supplied before the model writes. |
-| **Draft → review** | The exact baseline draft is reviewed against the rulebook and minimally corrected. |
-| **Hybrid** | Core principles guide the first draft, then the full rulebook is used for review. |
+| **Rules first** | A condensed, faithful digest of the rulebook is supplied before the model writes. |
+| **Draft → review** | The exact baseline draft is reviewed against the same condensed rules and minimally corrected. |
+| **Hybrid** | Core principles guide the first draft, then the same review pass is applied. |
 
-The public demo runs `onnx-community/SmolLM2-135M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The first run downloads about 180 MB of quantized model data; the browser cache is reused afterward.
+The public demo runs `onnx-community/SmolLM2-360M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The q4 model is about 386 MB; the browser cache is reused after the first download.
 
-Inference runs inside a Web Worker and streams partial text back to the page, so the interface stays responsive during generation. The demo includes several unrelated example briefs—community garden, science explainer, workplace update, and repair-café introduction—or readers can enter their own.
+For compatibility, the public demo deliberately uses the browser's default **CPU/WASM** backend rather than requiring WebGPU. Inference runs inside a Web Worker and streams partial text back to the page, so the interface remains responsive while generation is happening.
+
+The full `SKILL.md` is intentionally **not** inserted verbatim into every browser-model prompt. Small local models become slow and lose useful context when thousands of rulebook words are prepended. The live lab therefore uses a short agent-facing digest that preserves the rulebook's main constraints; the full source remains available for inspection in this repository.
+
+The demo includes several unrelated example briefs—community garden, science explainer, workplace update, and repair-café introduction—or readers can enter their own. Each condition can be run independently, or all four can be run in sequence. One failed condition does not invalidate completed outputs from the others.
 
 The goal is not to prove that one workflow always wins. Try different briefs and compare the actual writing. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
 
-Because **Draft → review** starts from the exact baseline produced in the same run, it gives a particularly direct view of what the rulebook changes after generation.
+Because **Draft → review** starts from the exact baseline produced for the same brief, it gives a particularly direct view of what the rulebook changes after generation.
 
 ### Run the browser lab locally
 
