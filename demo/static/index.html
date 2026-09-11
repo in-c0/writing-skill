@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>writing-skill playground</title>
-  <link rel="stylesheet" href="./styles.css?v=2026-09-11-puter-1" />
+  <link rel="stylesheet" href="./styles.css?v=2026-09-11-pollinations-1" />
 </head>
 <body>
   <main class="shell">
@@ -12,7 +12,7 @@
       <p class="eyebrow">writing-skill</p>
       <h1>See what the rules actually change.</h1>
       <p class="lede">Give one brief to the same hosted model, then move through the writing approaches one stage at a time.</p>
-      <p class="backend-note">Generation is hosted through Puter.js. Nothing large is downloaded to your computer, and this page does not use Hugging Face CPU or ZeroGPU inference quota.</p>
+      <p class="backend-note">The page stays static. Generation is sent to an anonymous hosted text model, so there is no local model download, Hugging Face compute quota, or sign-in step.</p>
     </header>
 
     <section class="brief-card">
@@ -25,7 +25,7 @@
       </div>
       <label for="brief">Writing brief</label>
       <textarea id="brief" rows="7">Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.</textarea>
-      <p id="backend-status" class="status">Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route. No Hugging Face inference quota is used.</p>
+      <p id="backend-status" class="status">Pollinations openai-fast · GPT-OSS 20B · anonymous hosted inference · no account required.</p>
     </section>
 
     <section class="pipeline">
@@ -62,11 +62,10 @@
       <h2>What to compare</h2>
       <p>Do not ask only which version sounds more polished. Look at clarity, naturalness, concreteness, reader effort, useful repetition, rhythm, genre fit, and whether you would actually keep reading.</p>
       <p>The rulebook is a diagnostic tool, not a scorecard. Sometimes the baseline will already be better.</p>
-      <p class="small">The playground currently uses Puter.js with NVIDIA Nemotron 3 Nano Omni. Puter may ask you to sign in so it can associate AI usage with your account. The selected model is currently listed by Puter as a free route.</p>
+      <p class="small">Generation currently uses Pollinations' anonymous <code>openai-fast</code> route, listed as GPT-OSS 20B. Requests are sent to that external service, so do not use the playground for sensitive or private text.</p>
       <a href="https://github.com/in-c0/writing-skill" target="_blank" rel="noreferrer">Read the full writing skill on GitHub</a>
     </section>
   </main>
-  <script src="https://js.puter.com/v2/"></script>
-  <script type="module" src="./app.js?v=2026-09-11-puter-1"></script>
+  <script type="module" src="./app.js?v=2026-09-11-pollinations-1"></script>
 </body>
 </html>
