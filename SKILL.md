@@ -276,7 +276,7 @@ Good teaching includes error recovery.
 
 Do not inflate what the text, product, or lesson can realistically provide.
 
-A vocabulary book can help readers understand terminology and communicate more clearly. It should not need to promise identity transformation, belonging, intellectual liberation, or career success.
+A troubleshooting guide can help readers diagnose common problems and decide what to try next. It should not need to promise mastery, transformation, or guaranteed success.
 
 Smaller, credible promises sound more confident than oversized ones.
 
