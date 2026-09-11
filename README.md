@@ -29,14 +29,24 @@ The skill is especially useful for:
 
 **[▶ Try the Writing Skill Approach Lab on Hugging Face](https://huggingface.co/spaces/wldud5192/writing-skill-approach-lab)**
 
-The lab compares four ways of applying the same writing skill to the same brief using the **same model and deterministic decoding**.
+The lab compares four conditions using the **same model and deterministic decoding**:
 
-| Approach | What changes |
+| Condition | What changes |
 | --- | --- |
 | **Baseline** | No added writing-style instructions. |
 | **Rules first** | A condensed, faithful digest of the rulebook is supplied before the model writes. |
 | **Draft → review** | The exact baseline draft is reviewed against the same condensed rules and minimally corrected. |
-| **Hybrid** | Core principles guide the first draft, then the same review pass is applied. |
+| **Hybrid** | Core principles guide the first draft, followed by a separate review pass. |
+
+Rather than running every generation behind one button, the interface is a visible experiment pipeline:
+
+1. **Load model** — download and initialize the local model once.
+2. **Generate baseline** — enter or choose a brief and produce the no-instructions control output.
+3. **Approach 1: Rules first** — generate a fresh answer with the rules supplied before drafting.
+4. **Approach 2: Draft → review** — revise the exact baseline against the rules.
+5. **Approach 3: Hybrid** — draft with the core principles, then review that draft in a separate pass.
+
+Each stage unlocks after the previous one completes, so readers can inspect the output before deciding to spend compute on the next stage. There is no artificial short-word cap; readers control the output token budget in the baseline stage and the same budget is used throughout the comparison.
 
 The public demo runs `onnx-community/SmolLM2-360M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The q4 model is about 386 MB; the browser cache is reused after the first download.
 
@@ -44,7 +54,7 @@ For compatibility, the public demo deliberately uses the browser's default **CPU
 
 The full `SKILL.md` is intentionally **not** inserted verbatim into every browser-model prompt. Small local models become slow and lose useful context when thousands of rulebook words are prepended. The live lab therefore uses a short agent-facing digest that preserves the rulebook's main constraints; the full source remains available for inspection in this repository.
 
-The demo includes several unrelated example briefs—community garden, science explainer, workplace update, and repair-café introduction—or readers can enter their own. Each condition can be run independently, or all four can be run in sequence. One failed condition does not invalidate completed outputs from the others.
+The demo includes several unrelated example briefs—community garden, science explainer, workplace update, and repair-café introduction—or readers can enter their own.
 
 The goal is not to prove that one workflow always wins. Try different briefs and compare the actual writing. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
 
