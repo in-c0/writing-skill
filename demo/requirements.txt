@@ -1,0 +1,4 @@
+gradio>=5.44,<6
+transformers>=4.51,<5
+torch>=2.6,<3
+accelerate>=1.4,<2
