@@ -1,7 +1,12 @@
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
-
-const MODEL_ID = 'onnx-community/SmolLM2-360M-Instruct-ONNX';
 const MAX_BRIEF_CHARS = 5000;
+const GENERATION_TIMEOUT_MS = 120000;
+
+const EXAMPLES = {
+  garden: `Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.`,
+  science: `Explain to a curious 13-year-old why a metal bench can feel colder than a wooden bench even when both have been in the same room. Use concrete everyday examples, avoid equations, and keep the explanation natural and easy to follow.`,
+  workplace: `Write a short update to coworkers explaining that the meeting-room booking system will be unavailable on Friday from 4 to 5 p.m. for maintenance. Explain what is changing, what people should do during the outage, and where to ask for help. Keep it calm and practical.`,
+  event: `Write a welcoming introduction for a neighborhood repair-cafe event. Explain what visitors can bring, how volunteers will help, and what kinds of repairs may not be possible. Keep it warm, specific, and realistic without sounding promotional.`,
+};
 
 const CORE_PRINCIPLES = `
 Write for the reader, not for the performance of writing.
@@ -22,9 +27,15 @@ const runEl = $('run');
 const statusEl = $('status');
 const progressEl = $('progress');
 
-let generator = null;
 let skill = '';
 let checklist = '';
+let worker = null;
+let modelReady = false;
+let modelLoadPromise = null;
+let modelLoadResolve = null;
+let modelLoadReject = null;
+let requestCounter = 0;
+const pending = new Map();
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -33,6 +44,12 @@ function setStatus(text) {
 function setProgress(value, visible = true) {
   progressEl.hidden = !visible;
   progressEl.value = Math.max(0, Math.min(100, Number(value) || 0));
+}
+
+function show(id, value, state = '') {
+  const el = $(id);
+  el.textContent = value || '(No text returned.)';
+  el.dataset.state = state;
 }
 
 async function fetchFirst(paths) {
@@ -57,64 +74,133 @@ async function loadRules() {
   ]);
 }
 
-async function createGenerator(device) {
-  return pipeline('text-generation', MODEL_ID, {
-    dtype: 'q4',
-    device,
-    progress_callback: (info) => {
-      const pct = typeof info?.progress === 'number' ? info.progress : null;
-      if (pct !== null) {
-        setProgress(pct, true);
-        setStatus(`Loading model in your browser… ${Math.round(pct)}%`);
-      } else if (info?.status) {
-        setStatus(`Loading model in your browser… ${info.status}`);
-      }
-    },
-  });
+function resetWorker(reason = null) {
+  if (worker) worker.terminate();
+  worker = null;
+  modelReady = false;
+  modelLoadPromise = null;
+  modelLoadResolve = null;
+  modelLoadReject = null;
+  for (const { reject, timer } of pending.values()) {
+    clearTimeout(timer);
+    reject(new Error(reason || 'The model worker was restarted.'));
+  }
+  pending.clear();
 }
 
-async function loadModel() {
-  if (generator) return generator;
-  setProgress(1, true);
-  const preferWebGPU = Boolean(navigator.gpu);
+function ensureWorker() {
+  if (worker) return worker;
+  worker = new Worker('./worker.js', { type: 'module' });
 
-  if (preferWebGPU) {
-    try {
-      setStatus('Loading the quantized model with WebGPU… first run downloads the weights.');
-      generator = await createGenerator('webgpu');
-      setProgress(100, false);
-      setStatus('Model loaded with WebGPU. Running experiment…');
-      return generator;
-    } catch (error) {
-      console.warn('WebGPU load failed; falling back to WASM.', error);
-      setStatus('WebGPU was unavailable for this model. Falling back to CPU/WASM…');
+  worker.addEventListener('message', (event) => {
+    const message = event.data || {};
+
+    if (message.type === 'model-status') {
+      setStatus(message.message || 'Loading model…');
+      return;
     }
-  }
 
-  generator = await createGenerator('wasm');
-  setProgress(100, false);
-  setStatus('Model loaded with CPU/WASM. Running experiment…');
-  return generator;
-}
+    if (message.type === 'model-progress') {
+      if (typeof message.progress === 'number') {
+        setProgress(message.progress, true);
+        const file = message.file ? ` · ${message.file.split('/').pop()}` : '';
+        setStatus(`Loading model in your browser… ${Math.round(message.progress)}%${file}`);
+      } else if (message.status) {
+        setStatus(`Loading model in your browser… ${message.status}`);
+      }
+      return;
+    }
 
-function extractText(result) {
-  const value = result?.[0]?.generated_text;
-  if (typeof value === 'string') return value.trim();
-  if (Array.isArray(value)) {
-    const assistant = [...value].reverse().find((message) => message?.role === 'assistant');
-    if (assistant?.content) return String(assistant.content).trim();
-  }
-  return String(value ?? '').trim();
-}
+    if (message.type === 'model-ready') {
+      modelReady = true;
+      setProgress(100, false);
+      setStatus(`Model ready with ${message.device === 'webgpu' ? 'WebGPU' : 'CPU/WASM'}.`);
+      if (modelLoadResolve) modelLoadResolve(message);
+      modelLoadResolve = null;
+      modelLoadReject = null;
+      return;
+    }
 
-async function generate(messages, maxNewTokens) {
-  const result = await generator(messages, {
-    max_new_tokens: maxNewTokens,
-    do_sample: false,
-    return_full_text: false,
-    repetition_penalty: 1.04,
+    if (message.type === 'generation-stream') {
+      const job = pending.get(message.requestId);
+      if (job?.outputId) show(job.outputId, message.text, 'streaming');
+      return;
+    }
+
+    if (message.type === 'generation-complete') {
+      const job = pending.get(message.requestId);
+      if (!job) return;
+      clearTimeout(job.timer);
+      pending.delete(message.requestId);
+      if (job.outputId) show(job.outputId, message.text, 'complete');
+      job.resolve(message.text);
+      return;
+    }
+
+    if (message.type === 'worker-error') {
+      const error = new Error(message.message || 'Browser model failed.');
+      if (message.requestId && pending.has(message.requestId)) {
+        const job = pending.get(message.requestId);
+        clearTimeout(job.timer);
+        pending.delete(message.requestId);
+        if (job.outputId) show(job.outputId, `Error: ${error.message}`, 'error');
+        job.reject(error);
+      } else if (modelLoadReject) {
+        modelLoadReject(error);
+        modelLoadResolve = null;
+        modelLoadReject = null;
+      } else {
+        setStatus(`Model error: ${error.message}`);
+      }
+    }
   });
-  return extractText(result);
+
+  worker.addEventListener('error', (event) => {
+    const error = new Error(event.message || 'The browser model worker crashed.');
+    if (modelLoadReject) modelLoadReject(error);
+    setStatus(error.message);
+    resetWorker(error.message);
+  });
+
+  return worker;
+}
+
+async function ensureModel() {
+  if (modelReady) return;
+  if (modelLoadPromise) return modelLoadPromise;
+
+  ensureWorker();
+  setStatus('Preparing a small local model. The first run downloads about 180 MB and caches it in your browser…');
+  setProgress(1, true);
+
+  modelLoadPromise = new Promise((resolve, reject) => {
+    modelLoadResolve = resolve;
+    modelLoadReject = reject;
+    worker.postMessage({ type: 'load', preferWebGPU: Boolean(navigator.gpu) });
+  });
+
+  try {
+    await modelLoadPromise;
+  } finally {
+    modelLoadPromise = null;
+  }
+}
+
+function generate(messages, maxNewTokens, outputId = null) {
+  const requestId = `job-${++requestCounter}`;
+  if (outputId) show(outputId, 'Starting…', 'running');
+
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      pending.delete(requestId);
+      if (outputId) show(outputId, 'Generation timed out. Reload the page and try a shorter output.', 'error');
+      resetWorker('Generation timed out.');
+      reject(new Error('Generation timed out after two minutes.'));
+    }, GENERATION_TIMEOUT_MS);
+
+    pending.set(requestId, { resolve, reject, timer, outputId });
+    worker.postMessage({ type: 'generate', requestId, messages, maxNewTokens });
+  });
 }
 
 function baselineMessages(brief) {
@@ -151,13 +237,17 @@ function hybridInitialMessages(brief) {
   ];
 }
 
-function show(id, value) {
-  $(id).textContent = value || '(No text returned.)';
+function selectExample(key) {
+  if (!EXAMPLES[key]) return;
+  briefEl.value = EXAMPLES[key];
+  document.querySelectorAll('.example').forEach((button) => {
+    button.classList.toggle('active', button.dataset.example === key);
+  });
 }
 
 async function runExperiment() {
   const brief = briefEl.value.trim();
-  const maxNewTokens = Math.max(80, Math.min(500, Number(tokensEl.value) || 260));
+  const maxNewTokens = Math.max(80, Math.min(320, Number(tokensEl.value) || 180));
 
   if (!brief) {
     setStatus('Enter a writing brief first.');
@@ -170,42 +260,49 @@ async function runExperiment() {
   }
 
   runEl.disabled = true;
-  for (const id of ['baseline', 'rules', 'review', 'hybrid']) show(id, 'Generating…');
+  show('baseline', 'Waiting for model…', 'waiting');
+  show('rules', 'Waiting for baseline…', 'waiting');
+  show('review', 'Waiting for baseline…', 'waiting');
+  show('hybrid', 'Waiting…', 'waiting');
 
   try {
     await loadRules();
-    await loadModel();
+    await ensureModel();
 
     setStatus('1/5 · Generating baseline…');
-    const baseline = await generate(baselineMessages(brief), maxNewTokens);
-    show('baseline', baseline);
+    const baseline = await generate(baselineMessages(brief), maxNewTokens, 'baseline');
 
     setStatus('2/5 · Generating rules-first version…');
-    const rulesFirst = await generate(rulesFirstMessages(brief), maxNewTokens);
-    show('rules', rulesFirst);
+    const rulesFirst = await generate(rulesFirstMessages(brief), maxNewTokens, 'rules');
 
     setStatus('3/5 · Reviewing the exact baseline against the rulebook…');
-    const reviewed = await generate(reviewMessages(brief, baseline), maxNewTokens);
-    show('review', reviewed);
+    const reviewed = await generate(reviewMessages(brief, baseline), maxNewTokens, 'review');
 
     setStatus('4/5 · Generating hybrid first draft…');
     const hybridDraft = await generate(hybridInitialMessages(brief), maxNewTokens);
 
     setStatus('5/5 · Reviewing the hybrid draft against the full rulebook…');
-    const hybrid = await generate(reviewMessages(brief, hybridDraft), maxNewTokens);
-    show('hybrid', hybrid);
+    const hybrid = await generate(reviewMessages(brief, hybridDraft), maxNewTokens, 'hybrid');
 
+    if (!rulesFirst || !reviewed || !hybrid) throw new Error('One or more variants returned no text.');
     setStatus('Complete. Compare the writing, not just the amount of polish.');
-    setProgress(100, false);
   } catch (error) {
     console.error(error);
-    setStatus(`Experiment failed: ${error?.message || error}. Try a Chromium-based browser with WebGPU, or reload and use the CPU fallback.`);
+    setStatus(`Experiment stopped: ${error?.message || error}`);
   } finally {
     runEl.disabled = false;
   }
 }
 
 runEl.addEventListener('click', runExperiment);
+
+document.querySelectorAll('.example').forEach((button) => {
+  button.addEventListener('click', () => selectExample(button.dataset.example));
+});
+
+briefEl.addEventListener('input', () => {
+  document.querySelectorAll('.example').forEach((button) => button.classList.remove('active'));
+});
 
 document.querySelectorAll('.copy').forEach((button) => {
   button.addEventListener('click', async () => {
