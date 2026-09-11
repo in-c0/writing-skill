@@ -1,6 +1,6 @@
 const MAX_BRIEF_CHARS = 5000;
-const GENERATION_TIMEOUT_MS = 180000;
-const ASSET_VERSION = '2026-09-11-2';
+const GENERATION_TIMEOUT_MS = 120000;
+const ASSET_VERSION = '2026-09-11-3';
 
 const EXAMPLES = {
   garden: `Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.`,
@@ -9,25 +9,18 @@ const EXAMPLES = {
   event: `Write a welcoming introduction for a neighborhood repair-cafe event. Explain what visitors can bring, how volunteers will help, and what kinds of repairs may not be possible. Keep it warm, specific, and realistic without sounding promotional.`,
 };
 
-// A compact, agent-facing digest of SKILL.md. The full public rulebook remains
-// linked from the page; this shorter form makes the experiment practical on a
-// small browser model without changing the principles being tested.
+// Compact public digest of the full skill. It deliberately keeps the highest-impact
+// rules only so prompt prefill stays small enough for a browser model.
 const COMPACT_RULES = `
 Write for the reader, not for the performance of writing.
-Start from what the reader needs to understand or do, not from a grand observation.
-Prefer concrete situations, actions, and ordinary verbs before abstract philosophy.
-Keep semantic compression moderate. Spend words when they improve comprehension.
-Let some sentences be ordinary connective prose; not every sentence needs a hook or payoff.
-Keep the register stable and appropriate to the reader.
-Repeat important terms when consistency helps. Allow useful redundancy for orientation or memory.
-Use aphorisms, metaphors, rhetorical symmetry, triads, punchlines, and paragraph clinchers sparingly.
-Address readers mainly through useful actions rather than long persona lists or identity claims.
-Create warmth by anticipating confusion, mistakes, forgetting, and recovery rather than announcing empathy.
-Keep promises proportional to what the text can actually do and avoid inflating the stakes.
-Keep examples close to the point they teach. Do not over-explain the pedagogy.
-When revising, preserve what already works and make the smallest useful changes.
-Write for the ear as well as the eye. Prefer natural breath groups and a plain ending when the thought is finished.
-The reader should notice the idea before noticing the prose.
+Start from what the reader needs to understand or do.
+Prefer concrete situations and ordinary verbs before abstractions.
+Let some sentences be ordinary; avoid constant hooks, contrasts, triads, slogans, and clinchers.
+Keep the register stable, use important terms consistently, and allow useful repetition.
+Create warmth by anticipating confusion and recovery instead of announcing empathy.
+Keep examples close to the point and promises proportional to what the text can do.
+When revising, preserve what works and make the smallest useful changes.
+Write naturally for the ear as well as the eye. The reader should notice the idea before the prose.
 `.trim();
 
 const CORE_PRINCIPLES = `
@@ -35,16 +28,13 @@ Write for the reader, not for the performance of writing.
 Prefer clear, natural, specific prose over conspicuously polished prose.
 Start from the reader's problem or next natural question.
 Use concrete situations before abstract philosophy.
-Let some sentences be ordinary.
-Keep semantic compression moderate and the register stable.
-Use rhetorical devices sparingly.
-Preserve useful repetition, connective tissue, and a human narrator-reader relationship.
-Write so the idea is noticed before the prose.
+Let some sentences be ordinary and keep rhetorical devices sparse.
+Preserve useful repetition and natural connective tissue.
 `.trim();
 
 const $ = (id) => document.getElementById(id);
 const briefEl = $('brief');
-const tokensEl = $('tokens');
+const modeEl = $('length-mode');
 const runEl = $('run');
 const statusEl = $('status');
 const progressEl = $('progress');
@@ -55,9 +45,8 @@ let modelLoadPromise = null;
 let modelLoadResolve = null;
 let modelLoadReject = null;
 let requestCounter = 0;
-let lastBaselineBrief = '';
-let lastBaselineText = '';
 const pending = new Map();
+const cache = new Map();
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -121,7 +110,7 @@ function ensureWorker() {
     if (message.type === 'model-ready') {
       modelReady = true;
       setProgress(100, false);
-      setStatus('Model ready in CPU/WASM compatibility mode.');
+      setStatus('Model ready.');
       if (modelLoadResolve) modelLoadResolve(message);
       modelLoadResolve = null;
       modelLoadReject = null;
@@ -177,7 +166,7 @@ async function ensureModel() {
   if (modelLoadPromise) return modelLoadPromise;
 
   ensureWorker();
-  setStatus('Preparing the local writing model in CPU/WASM mode. First run downloads about 386 MB and caches it in your browser…');
+  setStatus('Preparing the local model. The first run downloads it once; later runs reuse the browser cache…');
   setProgress(1, true);
 
   modelLoadPromise = new Promise((resolve, reject) => {
@@ -203,7 +192,7 @@ function generate(messages, maxNewTokens, outputId = null) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       pending.delete(requestId);
-      if (outputId) show(outputId, 'Generation timed out. Try fewer output tokens or run this method again.', 'error');
+      if (outputId) show(outputId, 'Generation timed out. Try Quick mode or run this method again.', 'error');
       resetWorker('Generation timed out.');
       reject(new Error('Generation timed out.'));
     }, GENERATION_TIMEOUT_MS);
@@ -213,45 +202,62 @@ function generate(messages, maxNewTokens, outputId = null) {
   });
 }
 
-function baselineMessages(brief) {
-  return [{ role: 'user', content: brief }];
+function getSettings() {
+  const quick = modeEl?.value !== 'longer';
+  return quick
+    ? { maxNewTokens: 80, wordLimit: 75, label: 'Quick' }
+    : { maxNewTokens: 150, wordLimit: 140, label: 'Longer' };
 }
 
-function rulesFirstMessages(brief) {
+function controlledBrief(brief, wordLimit) {
+  return `${brief}\n\nFor this comparison, keep the final answer under ${wordLimit} words.`;
+}
+
+function baselineMessages(brief, wordLimit) {
+  return [{ role: 'user', content: controlledBrief(brief, wordLimit) }];
+}
+
+function rulesFirstMessages(brief, wordLimit) {
   return [
     {
       role: 'system',
       content: `Follow these writing rules while drafting. Specific instructions in the user's brief override general rules.\n\n${COMPACT_RULES}`,
     },
-    { role: 'user', content: brief },
+    { role: 'user', content: controlledBrief(brief, wordLimit) },
   ];
 }
 
-function reviewMessages(brief, draft) {
+function reviewMessages(brief, draft, wordLimit) {
   return [
     {
       role: 'system',
-      content: `Revise the existing draft using these rules diagnostically, not mechanically. A rule may require no change. Preserve strengths and make the smallest useful corrections. Return only the complete revised writing.\n\n${COMPACT_RULES}`,
+      content: `Revise the existing draft using these rules diagnostically, not mechanically. Preserve strengths and make only useful corrections. Return only the revised writing.\n\n${COMPACT_RULES}`,
     },
     {
       role: 'user',
-      content: `ORIGINAL BRIEF:\n${brief}\n\nDRAFT TO REVIEW:\n${draft}\n\nCorrect only concrete weaknesses. Preserve the draft's useful content and voice. Return only the final revised version.`,
+      content: `ORIGINAL BRIEF:\n${brief}\n\nDRAFT:\n${draft}\n\nKeep the final answer under ${wordLimit} words. Correct concrete weaknesses without rewriting merely for polish.`,
     },
   ];
 }
 
-function hybridInitialMessages(brief) {
+// The browser demo uses a single model call for Hybrid: core principles guide the
+// draft, then the model is explicitly told to review against the compact rules
+// before returning only the final version. This preserves the workflow idea while
+// avoiding an otherwise expensive extra generation pass.
+function hybridMessages(brief, wordLimit) {
   return [
-    { role: 'system', content: CORE_PRINCIPLES },
-    { role: 'user', content: brief },
+    {
+      role: 'system',
+      content: `${CORE_PRINCIPLES}\n\nDraft the answer internally, then review it against the following rules before returning only the final version:\n\n${COMPACT_RULES}`,
+    },
+    { role: 'user', content: controlledBrief(brief, wordLimit) },
   ];
 }
 
 function selectExample(key) {
   if (!EXAMPLES[key]) return;
   briefEl.value = EXAMPLES[key];
-  lastBaselineBrief = '';
-  lastBaselineText = '';
+  cache.clear();
   document.querySelectorAll('.example').forEach((button) => {
     button.classList.toggle('active', button.dataset.example === key);
   });
@@ -259,50 +265,59 @@ function selectExample(key) {
 
 function getInputs() {
   const brief = briefEl.value.trim();
-  const maxNewTokens = Math.max(60, Math.min(200, Number(tokensEl.value) || 120));
-
   if (!brief) throw new Error('Enter a writing brief first.');
   if (brief.length > MAX_BRIEF_CHARS) {
     throw new Error(`Please keep the brief under ${MAX_BRIEF_CHARS.toLocaleString()} characters for this browser demo.`);
   }
-  return { brief, maxNewTokens };
+  return { brief, ...getSettings() };
 }
 
-async function generateBaseline(brief, maxNewTokens, force = false) {
-  if (!force && lastBaselineBrief === brief && lastBaselineText) return lastBaselineText;
+function cacheKey(method, brief, maxNewTokens) {
+  return `${method}\u0000${maxNewTokens}\u0000${brief}`;
+}
+
+async function generateBaseline(brief, maxNewTokens, wordLimit, force = false) {
+  const key = cacheKey('baseline', brief, maxNewTokens);
+  if (!force && cache.has(key)) {
+    const text = cache.get(key);
+    show('baseline', text, 'complete');
+    return text;
+  }
   setStatus('Generating baseline…');
-  const text = await generate(baselineMessages(brief), maxNewTokens, 'baseline');
-  lastBaselineBrief = brief;
-  lastBaselineText = text;
+  const text = await generate(baselineMessages(brief, wordLimit), maxNewTokens, 'baseline');
+  cache.set(key, text);
   return text;
 }
 
-async function runMethod(method, brief, maxNewTokens) {
+async function runMethod(method, brief, maxNewTokens, wordLimit, force = false) {
   await ensureModel();
-
-  if (method === 'baseline') {
-    return generateBaseline(brief, maxNewTokens, true);
+  const key = cacheKey(method, brief, maxNewTokens);
+  if (!force && cache.has(key)) {
+    const text = cache.get(key);
+    show(method, text, 'complete');
+    return text;
   }
 
+  let text;
+  if (method === 'baseline') {
+    return generateBaseline(brief, maxNewTokens, wordLimit, force);
+  }
   if (method === 'rules') {
     setStatus('Generating rules-first version…');
-    return generate(rulesFirstMessages(brief), maxNewTokens, 'rules');
+    text = await generate(rulesFirstMessages(brief, wordLimit), maxNewTokens, 'rules');
+  } else if (method === 'review') {
+    const baseline = await generateBaseline(brief, maxNewTokens, wordLimit, false);
+    setStatus('Reviewing the exact baseline…');
+    text = await generate(reviewMessages(brief, baseline, wordLimit), maxNewTokens, 'review');
+  } else if (method === 'hybrid') {
+    setStatus('Generating hybrid version with an internal review…');
+    text = await generate(hybridMessages(brief, wordLimit), maxNewTokens, 'hybrid');
+  } else {
+    throw new Error(`Unknown method: ${method}`);
   }
 
-  if (method === 'review') {
-    const baseline = await generateBaseline(brief, maxNewTokens, false);
-    setStatus('Reviewing the exact baseline against the condensed rulebook…');
-    return generate(reviewMessages(brief, baseline), maxNewTokens, 'review');
-  }
-
-  if (method === 'hybrid') {
-    setStatus('Generating hybrid first draft…');
-    const hybridDraft = await generate(hybridInitialMessages(brief), maxNewTokens);
-    setStatus('Reviewing the hybrid draft against the condensed rulebook…');
-    return generate(reviewMessages(brief, hybridDraft), maxNewTokens, 'hybrid');
-  }
-
-  throw new Error(`Unknown method: ${method}`);
+  cache.set(key, text);
+  return text;
 }
 
 async function runOne(method) {
@@ -316,8 +331,8 @@ async function runOne(method) {
 
   setBusy(true);
   try {
-    await runMethod(method, inputs.brief, inputs.maxNewTokens);
-    setStatus('Complete. Compare the result with another method, or run all four.');
+    await runMethod(method, inputs.brief, inputs.maxNewTokens, inputs.wordLimit, true);
+    setStatus(`Complete · ${inputs.label} mode. Run another method to compare.`);
   } catch (error) {
     console.error(error);
     setStatus(`This method stopped: ${error?.message || error}`);
@@ -336,31 +351,24 @@ async function runExperiment() {
   }
 
   setBusy(true);
-  show('baseline', 'Waiting…', 'waiting');
-  show('rules', 'Waiting…', 'waiting');
-  show('review', 'Waiting for baseline…', 'waiting');
-  show('hybrid', 'Waiting…', 'waiting');
-
-  const methods = ['baseline', 'rules', 'review', 'hybrid'];
   let failures = 0;
+  const methods = ['baseline', 'rules', 'review', 'hybrid'];
 
   try {
-    for (const method of methods) {
+    for (let i = 0; i < methods.length; i += 1) {
+      const method = methods[i];
+      const key = cacheKey(method, inputs.brief, inputs.maxNewTokens);
+      if (!cache.has(key)) show(method, method === 'review' ? 'Waiting for baseline…' : 'Waiting…', 'waiting');
+      setStatus(`${i + 1}/4 · ${method === 'baseline' ? 'Baseline' : method === 'rules' ? 'Rules first' : method === 'review' ? 'Draft → review' : 'Hybrid'}…`);
       try {
-        await runMethod(method, inputs.brief, inputs.maxNewTokens);
+        await runMethod(method, inputs.brief, inputs.maxNewTokens, inputs.wordLimit, false);
       } catch (error) {
         failures += 1;
         console.error(`${method} failed`, error);
-        const outputId = method;
-        if ($(outputId)?.dataset.state !== 'error') {
-          show(outputId, `Error: ${error?.message || error}`, 'error');
-        }
-        // A timed-out generation restarts the worker. The next method will
-        // re-initialize from the browser cache instead of being blocked.
+        if ($(method)?.dataset.state !== 'error') show(method, `Error: ${error?.message || error}`, 'error');
       }
     }
-
-    setStatus(failures ? `Finished with ${failures} method${failures === 1 ? '' : 's'} unable to complete. Other results remain usable.` : 'Complete. Compare the writing, not just the amount of polish.');
+    setStatus(failures ? `Finished with ${failures} method${failures === 1 ? '' : 's'} unable to complete.` : `Complete · ${inputs.label} mode. Cached results are reused until the brief or length changes.`);
   } finally {
     setBusy(false);
   }
@@ -377,9 +385,12 @@ document.querySelectorAll('.example').forEach((button) => {
 });
 
 briefEl.addEventListener('input', () => {
-  lastBaselineBrief = '';
-  lastBaselineText = '';
+  cache.clear();
   document.querySelectorAll('.example').forEach((button) => button.classList.remove('active'));
+});
+
+modeEl?.addEventListener('change', () => {
+  cache.clear();
 });
 
 document.querySelectorAll('.copy').forEach((button) => {
