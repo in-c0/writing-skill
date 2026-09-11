@@ -1,5 +1,6 @@
 const MAX_BRIEF_CHARS = 5000;
 const GENERATION_TIMEOUT_MS = 120000;
+const ASSET_VERSION = '2026-09-11-1';
 
 const EXAMPLES = {
   garden: `Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.`,
@@ -90,7 +91,7 @@ function resetWorker(reason = null) {
 
 function ensureWorker() {
   if (worker) return worker;
-  worker = new Worker('./worker.js', { type: 'module' });
+  worker = new Worker(`./worker.js?v=${ASSET_VERSION}`, { type: 'module' });
 
   worker.addEventListener('message', (event) => {
     const message = event.data || {};
