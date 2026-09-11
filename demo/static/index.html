@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <title>Writing Skill Approach Lab</title>
-  <link rel="stylesheet" href="./styles.css?v=2026-09-11-1" />
+  <link rel="stylesheet" href="./styles.css?v=2026-09-11-2" />
 </head>
 <body>
   <main class="shell">
@@ -16,6 +16,7 @@
       <div class="badges">
         <span>Runs in your browser</span>
         <span>No API key</span>
+        <span>CPU/WASM compatible</span>
         <span>Deterministic decoding</span>
       </div>
     </header>
@@ -35,54 +36,67 @@
       <div class="control-row">
         <label class="token-control" for="tokens">
           <span>Max new tokens</span>
-          <input id="tokens" type="number" min="80" max="320" step="20" value="180" />
+          <input id="tokens" type="number" min="60" max="200" step="20" value="120" />
         </label>
-        <button id="run" type="button">Compare approaches</button>
+        <button id="run" type="button">Run all 4 approaches</button>
       </div>
 
       <div class="status-wrap" aria-live="polite">
-        <div id="status">Ready. The first run downloads a small quantized model into your browser cache.</div>
+        <div id="status">Ready. The first run downloads a quantized writing model into your browser cache. WebGPU is not required.</div>
         <progress id="progress" max="100" value="0" hidden></progress>
       </div>
     </section>
 
     <section class="methods" aria-label="Experiment conditions">
       <article><strong>Baseline</strong><span>No added writing-style instructions.</span></article>
-      <article><strong>Rules first</strong><span>Full rulebook before drafting.</span></article>
-      <article><strong>Draft → review</strong><span>Exact baseline revised against the rulebook.</span></article>
-      <article><strong>Hybrid</strong><span>Core principles first, then full review.</span></article>
+      <article><strong>Rules first</strong><span>Condensed rulebook supplied before drafting.</span></article>
+      <article><strong>Draft → review</strong><span>Exact baseline revised against the same condensed rules.</span></article>
+      <article><strong>Hybrid</strong><span>Core principles first, then the same review pass.</span></article>
     </section>
 
     <section class="results" aria-label="Generated outputs">
       <article class="result-card">
-        <div class="result-head"><h2>Baseline</h2><button class="copy" data-target="baseline">Copy</button></div>
-        <pre id="baseline" class="output">Run the experiment to generate this version.</pre>
+        <div class="result-head">
+          <h2>Baseline</h2>
+          <div class="result-actions"><button class="run-one" data-method="baseline" type="button">Run</button><button class="copy" data-target="baseline" type="button">Copy</button></div>
+        </div>
+        <pre id="baseline" class="output">Run this method or run all four.</pre>
       </article>
       <article class="result-card">
-        <div class="result-head"><h2>Rules first</h2><button class="copy" data-target="rules">Copy</button></div>
-        <pre id="rules" class="output">Run the experiment to generate this version.</pre>
+        <div class="result-head">
+          <h2>Rules first</h2>
+          <div class="result-actions"><button class="run-one" data-method="rules" type="button">Run</button><button class="copy" data-target="rules" type="button">Copy</button></div>
+        </div>
+        <pre id="rules" class="output">Run this method or run all four.</pre>
       </article>
       <article class="result-card">
-        <div class="result-head"><h2>Draft → review</h2><button class="copy" data-target="review">Copy</button></div>
-        <pre id="review" class="output">Run the experiment to generate this version.</pre>
+        <div class="result-head">
+          <h2>Draft → review</h2>
+          <div class="result-actions"><button class="run-one" data-method="review" type="button">Run</button><button class="copy" data-target="review" type="button">Copy</button></div>
+        </div>
+        <pre id="review" class="output">Uses the exact baseline for the current brief. If needed, the baseline is generated first.</pre>
       </article>
       <article class="result-card">
-        <div class="result-head"><h2>Hybrid</h2><button class="copy" data-target="hybrid">Copy</button></div>
-        <pre id="hybrid" class="output">Run the experiment to generate this version.</pre>
+        <div class="result-head">
+          <h2>Hybrid</h2>
+          <div class="result-actions"><button class="run-one" data-method="hybrid" type="button">Run</button><button class="copy" data-target="hybrid" type="button">Copy</button></div>
+        </div>
+        <pre id="hybrid" class="output">Run this method or run all four.</pre>
       </article>
     </section>
 
     <section class="panel notes">
       <h2>What to compare</h2>
       <p>Do not ask only which version is more polished. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.</p>
-      <p><strong>Experimental detail:</strong> Draft → review starts from the exact Baseline output generated in the same run. The model and decoding settings stay fixed; the prompting workflow is what changes.</p>
-      <p class="model-note">Model: <a href="https://huggingface.co/onnx-community/SmolLM2-135M-Instruct-ONNX" target="_blank" rel="noreferrer">SmolLM2-135M-Instruct ONNX</a>, quantized for in-browser inference with Transformers.js. Generation runs in a Web Worker so the interface remains responsive.</p>
+      <p><strong>Experimental detail:</strong> Draft → review starts from the exact Baseline output for the current brief. The model and decoding settings stay fixed; the prompting workflow is what changes.</p>
+      <p><strong>Browser constraint:</strong> the live lab uses a condensed, faithful digest of the public rulebook so a small local model can run the comparison within a practical context window. The full rules remain available in the GitHub repository.</p>
+      <p class="model-note">Model: <a href="https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX" target="_blank" rel="noreferrer">SmolLM2-360M-Instruct ONNX</a>, q4 quantized for in-browser inference with Transformers.js. The browser demo defaults to CPU/WASM rather than requiring WebGPU.</p>
     </section>
 
     <footer>
-      <a href="https://github.com/in-c0/writing-skill" target="_blank" rel="noreferrer">View the rulebook on GitHub</a>
+      <a href="https://github.com/in-c0/writing-skill" target="_blank" rel="noreferrer">View the full rulebook on GitHub</a>
     </footer>
   </main>
-  <script type="module" src="./app.js?v=2026-09-11-1"></script>
+  <script type="module" src="./app.js?v=2026-09-11-2"></script>
 </body>
 </html>
