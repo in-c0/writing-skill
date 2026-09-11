@@ -49,6 +49,41 @@ Use this after drafting and before delivery.
 - Did "improving" the prose accidentally make it more performative?
 - Could the same improvement be made locally rather than replacing the voice?
 
+## Written / spoken / visual adaptation
+
+If the material exists across print, ebook, audiobook, narration, or companion web material, also check:
+
+- Does the written version use visual structure because it helps, rather than merely increasing density?
+- Does the spoken version work without the listener seeing the page?
+- Have equations been explained conceptually instead of mechanically read symbol by symbol, unless exact notation is the learning objective?
+- Has non-trivial code been explained by behavior, data flow, and control structure instead of read character by character?
+- Do diagram and figure descriptions explain the relationship or pattern that matters rather than inventorying visible objects?
+- Have graphs and tables been converted into useful comparisons and trends instead of long recitals of values?
+- If a visual is inherently necessary, does the narration say so honestly and explain what the listener should look for?
+- Does companion material deepen or enable inspection of the idea rather than repair narration that is otherwise incomprehensible?
+- Do written and spoken versions preserve the same factual claims, terminology, depth, and narrator identity even when wording differs?
+
+See [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) for the full adaptation rules.
+
+## Workflow comparison
+
+When quality matters, consider producing more than one version:
+
+- rules-first,
+- draft-first followed by iterative rule review,
+- and/or hybrid.
+
+Then ask:
+
+- Which version is clearest?
+- Which feels most natural?
+- Which preserves the source voice best?
+- Which would I rather keep reading or listening to?
+- Which corrections solved real reader-facing problems?
+- Which corrections merely made the writing more noticeable?
+
+Do not assume the version with the highest apparent rule compliance is the best version.
+
 ## Final de-polish pass
 
 Search for clusters of:
