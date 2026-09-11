@@ -1,0 +1,31 @@
+name: Deploy Hugging Face Space
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "SKILL.md"
+      - "CHECKLIST.md"
+      - "demo/**"
+      - ".github/workflows/deploy-hf-space.yml"
+
+jobs:
+  deploy:
+    if: ${{ secrets.HF_TOKEN != '' && vars.HF_SPACE_REPO != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deploy dependency
+        run: pip install "huggingface_hub>=0.27,<2"
+
+      - name: Create or update Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE_REPO: ${{ vars.HF_SPACE_REPO }}
+        run: python demo/deploy_to_hf.py
