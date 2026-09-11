@@ -1,6 +1,9 @@
 {
-  "name": "writing-skill-playground-backend",
+  "name": "writing-skill-api",
   "private": true,
   "version": "0.1.0",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@vercel/oidc": "3.8.7"
+  }
 }
