@@ -1,38 +1,33 @@
 ---
-title: Writing Skill Approach Lab
+title: writing-skill playground
 emoji: ✍️
 colorFrom: indigo
 colorTo: blue
-sdk: static
-app_file: index.html
+sdk: gradio
+app_file: app.py
+python_version: 3.10.13
+suggested_hardware: zero-a10g
 pinned: false
 license: apache-2.0
 ---
 
-# Writing Skill Approach Lab
+# writing-skill playground
 
-An interactive qualitative experiment for comparing different ways of applying the [`writing-skill`](https://github.com/in-c0/writing-skill) rulebook to the same writing brief.
+This Space lets you give one writing brief to the same model and compare several ways of applying the [`writing-skill`](https://github.com/in-c0/writing-skill) rulebook.
 
-The Space runs entirely in the visitor's browser with Transformers.js and uses the same model and deterministic decoding throughout.
+Work through the stages one at a time:
 
-The interface is intentionally staged rather than running every generation behind one button:
+1. Generate a normal baseline with no added writing instructions.
+2. Generate a fresh version with the rules supplied before drafting.
+3. Take the exact baseline and revise it against the rules.
+4. Try the hybrid workflow: draft with the core principles, then review the draft against the full rulebook.
 
-1. **Load model** — initialize the local model once.
-2. **Generate baseline** — create the no-instructions control output from a brief.
-3. **Approach 1: Rules first** — generate a fresh answer with a compact, faithful rule digest supplied before drafting.
-4. **Approach 2: Draft → review** — revise the exact baseline against the same rule digest.
-5. **Approach 3: Hybrid** — draft with the core principles, then run a separate review pass.
+Read each result before continuing. The useful question is not simply which version sounds more polished. Look for writing that is easier to follow, concrete where it should be concrete, natural in rhythm, and appropriate to the reader.
 
-Readers can inspect each output before moving to the next stage. There is no artificial short-word cap; the output token budget is set in the baseline stage and reused through the comparison.
+The Space uses `Qwen/Qwen2.5-1.5B-Instruct` with deterministic decoding. Inference runs on Hugging Face ZeroGPU, so visitors do not need to download a local model or provide an API key.
 
-The browser demo uses `onnx-community/SmolLM2-360M-Instruct-ONNX` with q4 quantized weights. The first visit downloads the model to the browser cache; later visits can reuse the cached files.
+ZeroGPU is shared infrastructure. A request can occasionally wait in a queue, and Hugging Face applies daily usage quotas. Signed-in users receive more quota than anonymous visitors.
 
-The public demo deliberately defaults to **CPU/WASM** and does not require WebGPU or browser feature flags. Inference runs in a Web Worker and streams partial output back to the interface so the page remains responsive.
+The full `SKILL.md` and `CHECKLIST.md` are deployed with the app. Rules-first and review therefore use the actual public rulebook rather than a separate approximation.
 
-Because a small local model cannot use a very long instruction prefix efficiently, the browser lab uses a compact agent-facing digest of the public rulebook rather than injecting the full `SKILL.md` into every prompt. The complete rulebook remains available in the GitHub repository.
-
-Readers can choose from several unrelated sample briefs—community garden, science explainer, workplace update, and repair-café introduction—or enter their own brief.
-
-This is not intended as a benchmark. It is a playground for seeing how prompting workflow changes prose and for comparing clarity, naturalness, usefulness, voice preservation, reader effort, recoverability, rhetorical over-engineering, rhythm, and genre fit.
-
-The Space is deployed automatically from the GitHub repository together with the current rulebook files, so the live experiment tracks the project itself.
+The playground includes several unrelated example briefs, and you can replace them with your own.
