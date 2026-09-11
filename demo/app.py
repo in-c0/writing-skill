@@ -10,13 +10,13 @@ MODEL_ID = os.getenv("MODEL_ID", "Qwen/Qwen2.5-1.5B-Instruct")
 MAX_INPUT_CHARS = 12000
 DEFAULT_MAX_NEW_TOKENS = 700
 
-ROOT = Path(__file__).resolve().parent.parent
+HERE = Path(__file__).resolve().parent
 
 
 def _read(name: str, fallback: str = "") -> str:
-    path = ROOT / name
-    if path.exists():
-        return path.read_text(encoding="utf-8")
+    for path in (HERE / name, HERE.parent / name):
+        if path.exists():
+            return path.read_text(encoding="utf-8")
     return fallback
 
 
