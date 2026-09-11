@@ -23,12 +23,8 @@ Read each result before continuing. The useful question is not simply which vers
 
 This Space is static. It does not run a model on Hugging Face CPU or ZeroGPU, and it does not download model weights to the reader's computer.
 
-Generation goes through Puter.js using NVIDIA Nemotron 3 Nano Omni:
+Generation is sent to Pollinations' anonymous text API using its `openai-fast` route, currently listed as an anonymous-tier GPT-OSS 20B model. No playground sign-in or API key is required. The same model and generation settings are used throughout one comparison.
 
-`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`
+The full `SKILL.md` and `CHECKLIST.md` are deployed with this Space and are used to build the Rules-first and review prompts.
 
-Puter currently lists that route at $0 for input and output. Puter may ask a visitor to sign in so it can associate AI usage with that person's account. No Puter API key is stored in this Space.
-
-The same model and settings are used for every stage in a comparison.
-
-The full `SKILL.md` and `CHECKLIST.md` are deployed with this static Space and are used to build the Rules-first and review prompts.
+The generation backend is an external public service. Do not submit private or sensitive writing, and expect that anonymous public endpoints can occasionally be rate-limited or changed by their provider.
