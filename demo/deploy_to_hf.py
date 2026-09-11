@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import shutil
 import tempfile
+import time
 
 from huggingface_hub import HfApi
 
@@ -62,3 +63,31 @@ except Exception as exc:
 
 print(f"Deployed: https://huggingface.co/spaces/{SPACE_REPO}")
 print("Requested hardware: zero-a10g (Hugging Face ZeroGPU)")
+
+# Verify the Space itself, not only the upload. A Gradio build can fail after the
+# Hub accepts the commit, so keep the workflow open until the runtime is healthy.
+deadline = time.time() + 600
+last_stage = None
+failure_stages = {"BUILD_ERROR", "RUNTIME_ERROR", "CONFIG_ERROR"}
+
+while time.time() < deadline:
+    runtime = api.get_space_runtime(repo_id=SPACE_REPO)
+    stage = str(runtime.stage or "")
+    if stage != last_stage:
+        print(
+            "Space runtime:",
+            stage,
+            "hardware=", runtime.hardware,
+            "requested=", runtime.requested_hardware,
+        )
+        last_stage = stage
+
+    if stage == "RUNNING":
+        print("Space is running.")
+        break
+    if stage in failure_stages:
+        raise SystemExit(f"Hugging Face Space failed to start: {stage}")
+
+    time.sleep(10)
+else:
+    raise SystemExit("Timed out waiting for the Hugging Face Space to become RUNNING.")
