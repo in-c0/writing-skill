@@ -21,19 +21,27 @@
     </header>
 
     <section class="panel controls">
+      <div class="example-row" aria-label="Example writing briefs">
+        <span class="example-label">Try an example</span>
+        <button class="example active" type="button" data-example="garden">Community garden</button>
+        <button class="example" type="button" data-example="science">Science explainer</button>
+        <button class="example" type="button" data-example="workplace">Workplace update</button>
+        <button class="example" type="button" data-example="event">Repair-café intro</button>
+      </div>
+
       <label for="brief">Writing brief</label>
       <textarea id="brief" rows="8">Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.</textarea>
 
       <div class="control-row">
         <label class="token-control" for="tokens">
           <span>Max new tokens</span>
-          <input id="tokens" type="number" min="80" max="500" step="20" value="260" />
+          <input id="tokens" type="number" min="80" max="320" step="20" value="180" />
         </label>
         <button id="run" type="button">Compare approaches</button>
       </div>
 
       <div class="status-wrap" aria-live="polite">
-        <div id="status">Ready. The model downloads on the first run and is cached by your browser.</div>
+        <div id="status">Ready. The first run downloads a small quantized model into your browser cache.</div>
         <progress id="progress" max="100" value="0" hidden></progress>
       </div>
     </section>
@@ -68,7 +76,7 @@
       <h2>What to compare</h2>
       <p>Do not ask only which version is more polished. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.</p>
       <p><strong>Experimental detail:</strong> Draft → review starts from the exact Baseline output generated in the same run. The model and decoding settings stay fixed; the prompting workflow is what changes.</p>
-      <p class="model-note">Model: <a href="https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX" target="_blank" rel="noreferrer">SmolLM2-360M-Instruct ONNX</a>, quantized for in-browser inference with Transformers.js.</p>
+      <p class="model-note">Model: <a href="https://huggingface.co/onnx-community/SmolLM2-135M-Instruct-ONNX" target="_blank" rel="noreferrer">SmolLM2-135M-Instruct ONNX</a>, quantized for in-browser inference with Transformers.js. Generation runs in a Web Worker so the interface remains responsive.</p>
     </section>
 
     <footer>
