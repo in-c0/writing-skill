@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark light" />
   <title>Writing Skill Approach Lab</title>
-  <link rel="stylesheet" href="./styles.css?v=2026-09-11-2" />
+  <link rel="stylesheet" href="./styles.css?v=2026-09-11-3" />
 </head>
 <body>
   <main class="shell">
@@ -34,15 +34,18 @@
       <textarea id="brief" rows="8">Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.</textarea>
 
       <div class="control-row">
-        <label class="token-control" for="tokens">
-          <span>Max new tokens</span>
-          <input id="tokens" type="number" min="60" max="200" step="20" value="120" />
+        <label class="token-control" for="length-mode">
+          <span>Output length</span>
+          <select id="length-mode">
+            <option value="quick" selected>Quick · ~75 words</option>
+            <option value="longer">Longer · ~140 words</option>
+          </select>
         </label>
         <button id="run" type="button">Run all 4 approaches</button>
       </div>
 
       <div class="status-wrap" aria-live="polite">
-        <div id="status">Ready. The first run downloads a quantized writing model into your browser cache. WebGPU is not required.</div>
+        <div id="status">Ready. Quick mode is recommended for comparison. The first run downloads the model once; later runs reuse the browser cache.</div>
         <progress id="progress" max="100" value="0" hidden></progress>
       </div>
     </section>
@@ -51,7 +54,7 @@
       <article><strong>Baseline</strong><span>No added writing-style instructions.</span></article>
       <article><strong>Rules first</strong><span>Condensed rulebook supplied before drafting.</span></article>
       <article><strong>Draft → review</strong><span>Exact baseline revised against the same condensed rules.</span></article>
-      <article><strong>Hybrid</strong><span>Core principles first, then the same review pass.</span></article>
+      <article><strong>Hybrid</strong><span>Core principles guide drafting, then an internal rule review happens in the same generation.</span></article>
     </section>
 
     <section class="results" aria-label="Generated outputs">
@@ -88,6 +91,7 @@
     <section class="panel notes">
       <h2>What to compare</h2>
       <p>Do not ask only which version is more polished. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.</p>
+      <p><strong>Speed:</strong> Quick mode keeps each result short, Hybrid uses one model pass instead of two, and completed results are cached while the brief and length stay unchanged.</p>
       <p><strong>Experimental detail:</strong> Draft → review starts from the exact Baseline output for the current brief. The model and decoding settings stay fixed; the prompting workflow is what changes.</p>
       <p><strong>Browser constraint:</strong> the live lab uses a condensed, faithful digest of the public rulebook so a small local model can run the comparison within a practical context window. The full rules remain available in the GitHub repository.</p>
       <p class="model-note">Model: <a href="https://huggingface.co/onnx-community/SmolLM2-360M-Instruct-ONNX" target="_blank" rel="noreferrer">SmolLM2-360M-Instruct ONNX</a>, q4 quantized for in-browser inference with Transformers.js. The browser demo defaults to CPU/WASM rather than requiring WebGPU.</p>
@@ -97,6 +101,6 @@
       <a href="https://github.com/in-c0/writing-skill" target="_blank" rel="noreferrer">View the full rulebook on GitHub</a>
     </footer>
   </main>
-  <script type="module" src="./app.js?v=2026-09-11-2"></script>
+  <script type="module" src="./app.js?v=2026-09-11-3"></script>
 </body>
 </html>
