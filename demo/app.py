@@ -6,10 +6,21 @@ import gradio as gr
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+try:
+    import spaces
+except ImportError:  # Lets the app run outside ZeroGPU for development.
+    class _Spaces:
+        @staticmethod
+        def GPU(*args, **kwargs):
+            def decorator(fn):
+                return fn
+            return decorator
+    spaces = _Spaces()
+
+
 MODEL_ID = os.getenv("MODEL_ID", "Qwen/Qwen2.5-1.5B-Instruct")
 MAX_INPUT_CHARS = 12000
-DEFAULT_MAX_NEW_TOKENS = 700
-
+DEFAULT_MAX_NEW_TOKENS = 320
 HERE = Path(__file__).resolve().parent
 
 
@@ -22,7 +33,7 @@ def _read(name: str, fallback: str = "") -> str:
 
 SKILL = _read(
     "SKILL.md",
-    """Write for the reader, not for the performance of writing. Prefer concrete situations, ordinary connective prose, useful redundancy, stable register, moderate semantic compression, and natural spoken rhythm. Avoid overusing aphorisms, metaphors, rhetorical symmetry, abstract noun stacks, inspirational closers, and polished persona lists. Preserve genre and source voice. Make the smallest change that improves the reader's experience.""",
+    "Write for the reader, not for the performance of writing. Prefer clear, natural, concrete prose. Preserve useful repetition and source voice. Use rhetorical devices sparingly.",
 )
 CHECKLIST = _read("CHECKLIST.md", "")
 
@@ -34,175 +45,338 @@ Use concrete situations before abstract philosophy.
 Let some sentences be ordinary.
 Keep semantic compression moderate and the register stable.
 Use rhetorical devices sparingly.
-Preserve useful repetition, connective tissue, and a human narrator-reader relationship.
-Write so the idea is noticed before the prose.
+Preserve useful repetition and natural connective tissue.
+The reader should notice the idea before the prose.
 """.strip()
 
-print(f"Loading {MODEL_ID}...")
+EXAMPLES = {
+    "Community garden": "Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.",
+    "Science explainer": "Explain to a curious 13-year-old why a metal bench can feel colder than a wooden bench even when both have been in the same room. Use concrete everyday examples, avoid equations, and keep the explanation natural and easy to follow.",
+    "Workplace update": "Write a short update to coworkers explaining that the meeting-room booking system will be unavailable on Friday from 4 to 5 p.m. for maintenance. Explain what is changing, what people should do during the outage, and where to ask for help. Keep it calm and practical.",
+    "Repair-café introduction": "Write a welcoming introduction for a neighborhood repair-café event. Explain what visitors can bring, how volunteers will help, and what kinds of repairs may not be possible. Keep it warm, specific, and realistic without sounding promotional.",
+}
+
+
+print(f"Loading hosted model: {MODEL_ID}")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_ID,
-    torch_dtype="auto",
+    torch_dtype=torch.bfloat16,
     low_cpu_mem_usage=True,
 )
+try:
+    model = model.to("cuda")
+except Exception:
+    # ZeroGPU provides CUDA emulation during Space startup. This fallback keeps
+    # local development possible on machines without CUDA.
+    model = model.to("cpu")
 model.eval()
 
 
-def generate(messages, max_new_tokens: int) -> str:
+def _validate_brief(brief: str, max_new_tokens: int) -> tuple[str, int]:
+    brief = (brief or "").strip()
+    if not brief:
+        raise gr.Error("Enter a writing brief first.")
+    if len(brief) > MAX_INPUT_CHARS:
+        raise gr.Error(f"Please keep the brief under {MAX_INPUT_CHARS:,} characters for this demo.")
+    return brief, int(max_new_tokens or DEFAULT_MAX_NEW_TOKENS)
+
+
+def _generate(messages: list[dict], max_new_tokens: int) -> str:
     prompt = tokenizer.apply_chat_template(
         messages,
         tokenize=False,
         add_generation_prompt=True,
     )
     inputs = tokenizer(prompt, return_tensors="pt")
+    device = next(model.parameters()).device
+    inputs = {key: value.to(device) for key, value in inputs.items()}
+
     with torch.inference_mode():
         output = model.generate(
             **inputs,
             max_new_tokens=max_new_tokens,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
         )
+
     new_tokens = output[0, inputs["input_ids"].shape[1]:]
     return tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
 
-def baseline_prompt(user_prompt: str):
-    # Deliberately no writing-style instruction beyond the user's own request.
-    return [{"role": "user", "content": user_prompt}]
+@spaces.GPU(duration=30)
+def generate_text(messages: list[dict], max_new_tokens: int) -> str:
+    return _generate(messages, max_new_tokens)
 
 
-def rules_first_prompt(user_prompt: str):
+@spaces.GPU(duration=30)
+def generate_hybrid(brief: str, max_new_tokens: int) -> str:
+    first_draft = _generate(
+        [
+            {"role": "system", "content": CORE_PRINCIPLES},
+            {"role": "user", "content": brief},
+        ],
+        max_new_tokens,
+    )
+    return _generate(review_prompt(brief, first_draft), max_new_tokens)
+
+
+def baseline_prompt(brief: str) -> list[dict]:
+    return [{"role": "user", "content": brief}]
+
+
+def rules_first_prompt(brief: str) -> list[dict]:
     return [
         {
             "role": "system",
             "content": (
-                "Follow this writing rulebook while drafting. Specific instructions in the user's brief win over general rules.\n\n"
+                "Follow this writing rulebook while drafting. Specific instructions in the user's brief override general rules.\n\n"
                 + SKILL
             ),
         },
-        {"role": "user", "content": user_prompt},
+        {"role": "user", "content": brief},
     ]
 
 
-def review_prompt(user_prompt: str, draft: str):
+def review_prompt(brief: str, draft: str) -> list[dict]:
+    checklist = f"\n\nFINAL CHECKLIST:\n{CHECKLIST}" if CHECKLIST else ""
     return [
         {
             "role": "system",
-            "content": "You are revising an existing draft. Use the rulebook diagnostically, not mechanically. A rule may require no change. Preserve strengths and make the smallest useful corrections. Return only the complete revised writing.\n\nRULEBOOK:\n" + SKILL + ("\n\nFINAL CHECKLIST:\n" + CHECKLIST if CHECKLIST else ""),
+            "content": (
+                "Revise an existing draft using the rulebook diagnostically, not mechanically. A rule may require no change. Preserve strengths and make the smallest useful corrections. Return only the complete revised writing.\n\nRULEBOOK:\n"
+                + SKILL
+                + checklist
+            ),
         },
         {
             "role": "user",
             "content": textwrap.dedent(
                 f"""
                 ORIGINAL BRIEF:
-                {user_prompt}
+                {brief}
 
                 DRAFT TO REVIEW:
                 {draft}
 
-                Review the draft against the relevant rules. For each relevant rule, decide internally whether a concrete weakness exists. Correct only real weaknesses. Re-read the whole passage after the corrections so local edits do not damage the voice or flow. Return only the final revised version.
+                Review only for concrete reader-facing weaknesses. Preserve useful content, tone, and voice. Return only the final revised version.
                 """
             ).strip(),
         },
     ]
 
 
-def hybrid_initial_prompt(user_prompt: str):
-    return [
-        {"role": "system", "content": CORE_PRINCIPLES},
-        {"role": "user", "content": user_prompt},
-    ]
-
-
-def compare(user_prompt: str, max_new_tokens: int):
-    user_prompt = (user_prompt or "").strip()
-    if not user_prompt:
-        raise gr.Error("Enter a writing brief first.")
-    if len(user_prompt) > MAX_INPUT_CHARS:
-        raise gr.Error(f"Please keep the brief under {MAX_INPUT_CHARS:,} characters for this demo.")
-
-    max_new_tokens = int(max_new_tokens or DEFAULT_MAX_NEW_TOKENS)
-
-    # A shared baseline is generated once. Approach B revises this exact output,
-    # which makes the delta easier to inspect than regenerating a second baseline.
-    baseline = generate(baseline_prompt(user_prompt), max_new_tokens)
-
-    rules_first = generate(rules_first_prompt(user_prompt), max_new_tokens)
-
-    draft_then_review = generate(
-        review_prompt(user_prompt, baseline),
-        max_new_tokens,
+def run_baseline(brief: str, max_new_tokens: int):
+    brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
+    text = generate_text(baseline_prompt(brief), max_new_tokens)
+    state = {"brief": brief, "text": text}
+    return (
+        text,
+        state,
+        "Baseline complete. This exact draft will be reused in Draft → review.",
+        gr.update(interactive=True),
     )
 
-    hybrid_draft = generate(hybrid_initial_prompt(user_prompt), max_new_tokens)
-    hybrid = generate(
-        review_prompt(user_prompt, hybrid_draft),
-        max_new_tokens,
+
+def run_rules_first(brief: str, max_new_tokens: int):
+    brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
+    text = generate_text(rules_first_prompt(brief), max_new_tokens)
+    return (
+        text,
+        "Rules-first version complete.",
+        gr.update(interactive=True),
     )
 
-    return baseline, rules_first, draft_then_review, hybrid
+
+def run_review(brief: str, max_new_tokens: int, baseline_state):
+    brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
+    if not baseline_state or baseline_state.get("brief") != brief:
+        raise gr.Error("The brief changed after the baseline was generated. Generate a new baseline first.")
+    text = generate_text(
+        review_prompt(brief, baseline_state["text"]),
+        max_new_tokens,
+    )
+    return (
+        text,
+        "Review complete. Compare it with the baseline to see what the rulebook actually changed.",
+        gr.update(interactive=True),
+    )
 
 
-DEFAULT_BRIEF = """Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read."""
+def run_hybrid(brief: str, max_new_tokens: int):
+    brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
+    text = generate_hybrid(brief, max_new_tokens)
+    return text, "Hybrid complete. You now have all four versions to compare."
 
-with gr.Blocks(title="Writing Skill Approach Lab") as demo:
+
+def choose_example(name: str):
+    return EXAMPLES.get(name, EXAMPLES["Community garden"])
+
+
+def reset_after_edit():
+    return (
+        None,
+        "",
+        "",
+        "",
+        "",
+        "Generate the baseline first.",
+        "Complete the previous stage to continue.",
+        "Complete the previous stage to continue.",
+        "Complete the previous stage to continue.",
+        gr.update(interactive=False),
+        gr.update(interactive=False),
+        gr.update(interactive=False),
+    )
+
+
+CSS = """
+.gradio-container { max-width: 1040px !important; }
+.stage { border: 1px solid var(--border-color-primary); border-radius: 16px; padding: 20px; margin: 14px 0; }
+.stage h2, .stage h3 { margin-top: 0; }
+.stage-note { color: var(--body-text-color-subdued); }
+.output textarea { font-size: 15px !important; line-height: 1.6 !important; }
+"""
+
+
+with gr.Blocks(title="writing-skill playground", css=CSS, theme=gr.themes.Soft()) as demo:
     gr.Markdown(
-        f"""
-# Writing Skill Approach Lab
+        """
+# writing-skill playground
 
-Compare four ways of prompting the **same model** (`{MODEL_ID}`) with deterministic decoding.
+Give one brief to the same model and move through the writing approaches one stage at a time. Read each result before continuing. The point is not to produce the most polished version; it is to see which workflow makes the writing clearer and more natural.
 
-The experiment holds the model, user brief, and decoding settings constant. The main variable is **when and how the writing rules are applied**.
-
-- **Baseline** — no added writing-style instruction.
-- **Rules first** — full rulebook is supplied before drafting.
-- **Draft → review** — the baseline draft is reviewed against the full rulebook and minimally corrected.
-- **Hybrid** — core principles guide the first draft, then the full rulebook is used for review.
-
-This is a qualitative playground, not a benchmark. Try several briefs and compare what actually reads better.
+The model runs on Hugging Face ZeroGPU, so nothing large is downloaded to your computer.
 """
     )
-
-    brief = gr.Textbox(
-        label="Writing brief",
-        value=DEFAULT_BRIEF,
-        lines=8,
-        placeholder="Describe what you want the model to write...",
+    gr.Markdown(
+        f"**Hosted model:** `{MODEL_ID}` · deterministic decoding · shared Hugging Face ZeroGPU"
     )
-    max_tokens = gr.Slider(
-        minimum=200,
-        maximum=1200,
-        value=DEFAULT_MAX_NEW_TOKENS,
-        step=50,
-        label="Maximum new tokens per generation",
-    )
-    run = gr.Button("Compare approaches", variant="primary")
 
-    with gr.Tabs():
-        with gr.Tab("Baseline — no instructions"):
-            out_baseline = gr.Markdown()
-        with gr.Tab("Rules first"):
-            out_rules = gr.Markdown()
-        with gr.Tab("Draft → review"):
-            out_review = gr.Markdown()
-        with gr.Tab("Hybrid"):
-            out_hybrid = gr.Markdown()
+    baseline_state = gr.State(value=None)
+
+    with gr.Group(elem_classes="stage"):
+        gr.Markdown("## 1 · Generate the baseline\nStart with ordinary model output. No writing-skill instructions are added.")
+        example = gr.Dropdown(
+            choices=list(EXAMPLES.keys()),
+            value="Community garden",
+            label="Example brief",
+        )
+        brief = gr.Textbox(
+            label="Writing brief",
+            value=EXAMPLES["Community garden"],
+            lines=6,
+            placeholder="Describe what you want the model to write...",
+        )
+        max_tokens = gr.Slider(
+            minimum=160,
+            maximum=700,
+            value=DEFAULT_MAX_NEW_TOKENS,
+            step=20,
+            label="Maximum new tokens",
+        )
+        baseline_button = gr.Button("Generate baseline", variant="primary")
+        baseline_status = gr.Markdown("Generate the baseline first.", elem_classes="stage-note")
+        baseline_output = gr.Textbox(
+            label="Baseline · no added writing instructions",
+            lines=12,
+            interactive=False,
+            show_copy_button=True,
+            elem_classes="output",
+        )
+
+    with gr.Group(elem_classes="stage"):
+        gr.Markdown("## 2 · Approach 1 — Rules first\nGenerate a fresh answer with the full writing rulebook supplied before drafting.")
+        rules_button = gr.Button("Run rules first", interactive=False)
+        rules_status = gr.Markdown("Complete the previous stage to continue.", elem_classes="stage-note")
+        rules_output = gr.Textbox(
+            label="Rules first",
+            lines=12,
+            interactive=False,
+            show_copy_button=True,
+            elem_classes="output",
+        )
+
+    with gr.Group(elem_classes="stage"):
+        gr.Markdown("## 3 · Approach 2 — Draft → review\nTake the exact baseline from Stage 1 and revise it against the rulebook. This isolates what the review step changes.")
+        review_button = gr.Button("Review the baseline", interactive=False)
+        review_status = gr.Markdown("Complete the previous stage to continue.", elem_classes="stage-note")
+        review_output = gr.Textbox(
+            label="Draft → review",
+            lines=12,
+            interactive=False,
+            show_copy_button=True,
+            elem_classes="output",
+        )
+
+    with gr.Group(elem_classes="stage"):
+        gr.Markdown("## 4 · Approach 3 — Hybrid\nDraft with the core principles, then review that draft against the full rulebook before returning the final version.")
+        hybrid_button = gr.Button("Run hybrid", interactive=False)
+        hybrid_status = gr.Markdown("Complete the previous stage to continue.", elem_classes="stage-note")
+        hybrid_output = gr.Textbox(
+            label="Hybrid",
+            lines=12,
+            interactive=False,
+            show_copy_button=True,
+            elem_classes="output",
+        )
 
     gr.Markdown(
         """
-### What to look for
+## Compare the writing
 
-Do not ask only which version is more polished. Compare clarity, naturalness, usefulness, voice, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
+Look at what changed, not just which version sounds more polished. Is it easier to follow? More concrete? Less performative? Does it preserve useful repetition? Does it sound like someone explaining the subject rather than displaying their writing?
 
-Because the baseline is reused as the starting draft for **Draft → review**, that tab shows the most direct effect of applying the rulebook after generation.
+The rulebook is a diagnostic tool, not a scorecard. Sometimes the baseline will already be better.
+
+[Read the full writing skill on GitHub](https://github.com/in-c0/writing-skill)
 """
     )
 
-    run.click(
-        fn=compare,
+    example.change(fn=choose_example, inputs=example, outputs=brief)
+
+    reset_outputs = [
+        baseline_state,
+        baseline_output,
+        rules_output,
+        review_output,
+        hybrid_output,
+        baseline_status,
+        rules_status,
+        review_status,
+        hybrid_status,
+        rules_button,
+        review_button,
+        hybrid_button,
+    ]
+    brief.input(fn=reset_after_edit, inputs=None, outputs=reset_outputs, queue=False)
+
+    baseline_button.click(
+        fn=run_baseline,
         inputs=[brief, max_tokens],
-        outputs=[out_baseline, out_rules, out_review, out_hybrid],
+        outputs=[baseline_output, baseline_state, baseline_status, rules_button],
+        api_name="baseline",
+    )
+    rules_button.click(
+        fn=run_rules_first,
+        inputs=[brief, max_tokens],
+        outputs=[rules_output, rules_status, review_button],
+        api_name="rules_first",
+    )
+    review_button.click(
+        fn=run_review,
+        inputs=[brief, max_tokens, baseline_state],
+        outputs=[review_output, review_status, hybrid_button],
+        api_name="draft_review",
+    )
+    hybrid_button.click(
+        fn=run_hybrid,
+        inputs=[brief, max_tokens],
+        outputs=[hybrid_output, hybrid_status],
+        api_name="hybrid",
     )
 
+
 if __name__ == "__main__":
-    demo.queue(default_concurrency_limit=1).launch()
+    demo.queue(default_concurrency_limit=2, max_size=32).launch()
