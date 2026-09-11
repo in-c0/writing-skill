@@ -1,6 +1,6 @@
 const MAX_BRIEF_CHARS = 5000;
-const GENERATION_TIMEOUT_MS = 120000;
-const ASSET_VERSION = '2026-09-11-1';
+const GENERATION_TIMEOUT_MS = 180000;
+const ASSET_VERSION = '2026-09-11-2';
 
 const EXAMPLES = {
   garden: `Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.`,
@@ -8,6 +8,27 @@ const EXAMPLES = {
   workplace: `Write a short update to coworkers explaining that the meeting-room booking system will be unavailable on Friday from 4 to 5 p.m. for maintenance. Explain what is changing, what people should do during the outage, and where to ask for help. Keep it calm and practical.`,
   event: `Write a welcoming introduction for a neighborhood repair-cafe event. Explain what visitors can bring, how volunteers will help, and what kinds of repairs may not be possible. Keep it warm, specific, and realistic without sounding promotional.`,
 };
+
+// A compact, agent-facing digest of SKILL.md. The full public rulebook remains
+// linked from the page; this shorter form makes the experiment practical on a
+// small browser model without changing the principles being tested.
+const COMPACT_RULES = `
+Write for the reader, not for the performance of writing.
+Start from what the reader needs to understand or do, not from a grand observation.
+Prefer concrete situations, actions, and ordinary verbs before abstract philosophy.
+Keep semantic compression moderate. Spend words when they improve comprehension.
+Let some sentences be ordinary connective prose; not every sentence needs a hook or payoff.
+Keep the register stable and appropriate to the reader.
+Repeat important terms when consistency helps. Allow useful redundancy for orientation or memory.
+Use aphorisms, metaphors, rhetorical symmetry, triads, punchlines, and paragraph clinchers sparingly.
+Address readers mainly through useful actions rather than long persona lists or identity claims.
+Create warmth by anticipating confusion, mistakes, forgetting, and recovery rather than announcing empathy.
+Keep promises proportional to what the text can actually do and avoid inflating the stakes.
+Keep examples close to the point they teach. Do not over-explain the pedagogy.
+When revising, preserve what already works and make the smallest useful changes.
+Write for the ear as well as the eye. Prefer natural breath groups and a plain ending when the thought is finished.
+The reader should notice the idea before noticing the prose.
+`.trim();
 
 const CORE_PRINCIPLES = `
 Write for the reader, not for the performance of writing.
@@ -28,14 +49,14 @@ const runEl = $('run');
 const statusEl = $('status');
 const progressEl = $('progress');
 
-let skill = '';
-let checklist = '';
 let worker = null;
 let modelReady = false;
 let modelLoadPromise = null;
 let modelLoadResolve = null;
 let modelLoadReject = null;
 let requestCounter = 0;
+let lastBaselineBrief = '';
+let lastBaselineText = '';
 const pending = new Map();
 
 function setStatus(text) {
@@ -53,26 +74,11 @@ function show(id, value, state = '') {
   el.dataset.state = state;
 }
 
-async function fetchFirst(paths) {
-  let lastError = null;
-  for (const path of paths) {
-    try {
-      const response = await fetch(path, { cache: 'no-cache' });
-      if (response.ok) return response.text();
-      lastError = new Error(`Could not load ${path}: ${response.status}`);
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError || new Error(`Could not load ${paths.join(' or ')}`);
-}
-
-async function loadRules() {
-  if (skill) return;
-  [skill, checklist] = await Promise.all([
-    fetchFirst(['./SKILL.md', '../../SKILL.md']),
-    fetchFirst(['./CHECKLIST.md', '../../CHECKLIST.md']),
-  ]);
+function setBusy(isBusy) {
+  runEl.disabled = isBusy;
+  document.querySelectorAll('.run-one').forEach((button) => {
+    button.disabled = isBusy;
+  });
 }
 
 function resetWorker(reason = null) {
@@ -115,7 +121,7 @@ function ensureWorker() {
     if (message.type === 'model-ready') {
       modelReady = true;
       setProgress(100, false);
-      setStatus(`Model ready with ${message.device === 'webgpu' ? 'WebGPU' : 'CPU/WASM'}.`);
+      setStatus('Model ready in CPU/WASM compatibility mode.');
       if (modelLoadResolve) modelLoadResolve(message);
       modelLoadResolve = null;
       modelLoadReject = null;
@@ -171,17 +177,20 @@ async function ensureModel() {
   if (modelLoadPromise) return modelLoadPromise;
 
   ensureWorker();
-  setStatus('Preparing a small local model. The first run downloads about 180 MB and caches it in your browser…');
+  setStatus('Preparing the local writing model in CPU/WASM mode. First run downloads about 386 MB and caches it in your browser…');
   setProgress(1, true);
 
   modelLoadPromise = new Promise((resolve, reject) => {
     modelLoadResolve = resolve;
     modelLoadReject = reject;
-    worker.postMessage({ type: 'load', preferWebGPU: Boolean(navigator.gpu) });
+    worker.postMessage({ type: 'load' });
   });
 
   try {
     await modelLoadPromise;
+  } catch (error) {
+    resetWorker(error?.message || String(error));
+    throw error;
   } finally {
     modelLoadPromise = null;
   }
@@ -194,9 +203,9 @@ function generate(messages, maxNewTokens, outputId = null) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       pending.delete(requestId);
-      if (outputId) show(outputId, 'Generation timed out. Reload the page and try a shorter output.', 'error');
+      if (outputId) show(outputId, 'Generation timed out. Try fewer output tokens or run this method again.', 'error');
       resetWorker('Generation timed out.');
-      reject(new Error('Generation timed out after two minutes.'));
+      reject(new Error('Generation timed out.'));
     }, GENERATION_TIMEOUT_MS);
 
     pending.set(requestId, { resolve, reject, timer, outputId });
@@ -212,7 +221,7 @@ function rulesFirstMessages(brief) {
   return [
     {
       role: 'system',
-      content: `Follow this writing rulebook while drafting. Specific instructions in the user's brief override general rules.\n\n${skill}`,
+      content: `Follow these writing rules while drafting. Specific instructions in the user's brief override general rules.\n\n${COMPACT_RULES}`,
     },
     { role: 'user', content: brief },
   ];
@@ -222,11 +231,11 @@ function reviewMessages(brief, draft) {
   return [
     {
       role: 'system',
-      content: `You are revising an existing draft. Use the rulebook diagnostically, not mechanically. A rule may require no change. Preserve strengths and make the smallest useful corrections. Return only the complete revised writing.\n\nRULEBOOK:\n${skill}\n\nFINAL CHECKLIST:\n${checklist}`,
+      content: `Revise the existing draft using these rules diagnostically, not mechanically. A rule may require no change. Preserve strengths and make the smallest useful corrections. Return only the complete revised writing.\n\n${COMPACT_RULES}`,
     },
     {
       role: 'user',
-      content: `ORIGINAL BRIEF:\n${brief}\n\nDRAFT TO REVIEW:\n${draft}\n\nReview the draft against the relevant rules. For each relevant rule, decide internally whether a concrete weakness exists. Correct only real weaknesses. Re-read the whole passage after the corrections so local edits do not damage the voice or flow. Return only the final revised version.`,
+      content: `ORIGINAL BRIEF:\n${brief}\n\nDRAFT TO REVIEW:\n${draft}\n\nCorrect only concrete weaknesses. Preserve the draft's useful content and voice. Return only the final revised version.`,
     },
   ];
 }
@@ -241,67 +250,135 @@ function hybridInitialMessages(brief) {
 function selectExample(key) {
   if (!EXAMPLES[key]) return;
   briefEl.value = EXAMPLES[key];
+  lastBaselineBrief = '';
+  lastBaselineText = '';
   document.querySelectorAll('.example').forEach((button) => {
     button.classList.toggle('active', button.dataset.example === key);
   });
 }
 
-async function runExperiment() {
+function getInputs() {
   const brief = briefEl.value.trim();
-  const maxNewTokens = Math.max(80, Math.min(320, Number(tokensEl.value) || 180));
+  const maxNewTokens = Math.max(60, Math.min(200, Number(tokensEl.value) || 120));
 
-  if (!brief) {
-    setStatus('Enter a writing brief first.');
-    briefEl.focus();
-    return;
-  }
+  if (!brief) throw new Error('Enter a writing brief first.');
   if (brief.length > MAX_BRIEF_CHARS) {
-    setStatus(`Please keep the brief under ${MAX_BRIEF_CHARS.toLocaleString()} characters for this browser demo.`);
+    throw new Error(`Please keep the brief under ${MAX_BRIEF_CHARS.toLocaleString()} characters for this browser demo.`);
+  }
+  return { brief, maxNewTokens };
+}
+
+async function generateBaseline(brief, maxNewTokens, force = false) {
+  if (!force && lastBaselineBrief === brief && lastBaselineText) return lastBaselineText;
+  setStatus('Generating baseline…');
+  const text = await generate(baselineMessages(brief), maxNewTokens, 'baseline');
+  lastBaselineBrief = brief;
+  lastBaselineText = text;
+  return text;
+}
+
+async function runMethod(method, brief, maxNewTokens) {
+  await ensureModel();
+
+  if (method === 'baseline') {
+    return generateBaseline(brief, maxNewTokens, true);
+  }
+
+  if (method === 'rules') {
+    setStatus('Generating rules-first version…');
+    return generate(rulesFirstMessages(brief), maxNewTokens, 'rules');
+  }
+
+  if (method === 'review') {
+    const baseline = await generateBaseline(brief, maxNewTokens, false);
+    setStatus('Reviewing the exact baseline against the condensed rulebook…');
+    return generate(reviewMessages(brief, baseline), maxNewTokens, 'review');
+  }
+
+  if (method === 'hybrid') {
+    setStatus('Generating hybrid first draft…');
+    const hybridDraft = await generate(hybridInitialMessages(brief), maxNewTokens);
+    setStatus('Reviewing the hybrid draft against the condensed rulebook…');
+    return generate(reviewMessages(brief, hybridDraft), maxNewTokens, 'hybrid');
+  }
+
+  throw new Error(`Unknown method: ${method}`);
+}
+
+async function runOne(method) {
+  let inputs;
+  try {
+    inputs = getInputs();
+  } catch (error) {
+    setStatus(error.message);
     return;
   }
 
-  runEl.disabled = true;
-  show('baseline', 'Waiting for model…', 'waiting');
-  show('rules', 'Waiting for baseline…', 'waiting');
+  setBusy(true);
+  try {
+    await runMethod(method, inputs.brief, inputs.maxNewTokens);
+    setStatus('Complete. Compare the result with another method, or run all four.');
+  } catch (error) {
+    console.error(error);
+    setStatus(`This method stopped: ${error?.message || error}`);
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function runExperiment() {
+  let inputs;
+  try {
+    inputs = getInputs();
+  } catch (error) {
+    setStatus(error.message);
+    return;
+  }
+
+  setBusy(true);
+  show('baseline', 'Waiting…', 'waiting');
+  show('rules', 'Waiting…', 'waiting');
   show('review', 'Waiting for baseline…', 'waiting');
   show('hybrid', 'Waiting…', 'waiting');
 
+  const methods = ['baseline', 'rules', 'review', 'hybrid'];
+  let failures = 0;
+
   try {
-    await loadRules();
-    await ensureModel();
+    for (const method of methods) {
+      try {
+        await runMethod(method, inputs.brief, inputs.maxNewTokens);
+      } catch (error) {
+        failures += 1;
+        console.error(`${method} failed`, error);
+        const outputId = method;
+        if ($(outputId)?.dataset.state !== 'error') {
+          show(outputId, `Error: ${error?.message || error}`, 'error');
+        }
+        // A timed-out generation restarts the worker. The next method will
+        // re-initialize from the browser cache instead of being blocked.
+      }
+    }
 
-    setStatus('1/5 · Generating baseline…');
-    const baseline = await generate(baselineMessages(brief), maxNewTokens, 'baseline');
-
-    setStatus('2/5 · Generating rules-first version…');
-    const rulesFirst = await generate(rulesFirstMessages(brief), maxNewTokens, 'rules');
-
-    setStatus('3/5 · Reviewing the exact baseline against the rulebook…');
-    const reviewed = await generate(reviewMessages(brief, baseline), maxNewTokens, 'review');
-
-    setStatus('4/5 · Generating hybrid first draft…');
-    const hybridDraft = await generate(hybridInitialMessages(brief), maxNewTokens);
-
-    setStatus('5/5 · Reviewing the hybrid draft against the full rulebook…');
-    const hybrid = await generate(reviewMessages(brief, hybridDraft), maxNewTokens, 'hybrid');
-
-    if (!rulesFirst || !reviewed || !hybrid) throw new Error('One or more variants returned no text.');
-    setStatus('Complete. Compare the writing, not just the amount of polish.');
-  } catch (error) {
-    console.error(error);
-    setStatus(`Experiment stopped: ${error?.message || error}`);
+    setStatus(failures ? `Finished with ${failures} method${failures === 1 ? '' : 's'} unable to complete. Other results remain usable.` : 'Complete. Compare the writing, not just the amount of polish.');
   } finally {
-    runEl.disabled = false;
+    setBusy(false);
   }
 }
 
 runEl.addEventListener('click', runExperiment);
+
+document.querySelectorAll('.run-one').forEach((button) => {
+  button.addEventListener('click', () => runOne(button.dataset.method));
+});
 
 document.querySelectorAll('.example').forEach((button) => {
   button.addEventListener('click', () => selectExample(button.dataset.example));
 });
 
 briefEl.addEventListener('input', () => {
+  lastBaselineBrief = '';
+  lastBaselineText = '';
   document.querySelectorAll('.example').forEach((button) => button.classList.remove('active'));
 });
 
