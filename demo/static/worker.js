@@ -1,9 +1,11 @@
 import { pipeline, TextStreamer } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1';
 
-const MODEL_ID = 'onnx-community/SmolLM2-135M-Instruct-ONNX';
+// 360M is materially more coherent than the 135M variant for this qualitative
+// writing comparison. We deliberately omit `device` when creating the pipeline:
+// Transformers.js then uses its browser-compatible CPU/WASM backend by default.
+const MODEL_ID = 'onnx-community/SmolLM2-360M-Instruct-ONNX';
 let generator = null;
 let loadingPromise = null;
-let activeDevice = null;
 
 function post(type, payload = {}) {
   self.postMessage({ type, ...payload });
@@ -14,11 +16,13 @@ function normalizedProgress(value) {
   return value <= 1 ? value * 100 : value;
 }
 
-async function createGenerator(device) {
-  post('model-status', { message: `Loading model with ${device === 'webgpu' ? 'WebGPU' : 'CPU/WASM'}…` });
+async function createGenerator() {
+  post('model-status', { message: 'Loading the writing model with CPU/WASM compatibility mode…' });
+
+  // No `device` option here on purpose. Per Transformers.js browser behavior,
+  // WASM/CPU is the default and works without WebGPU flags or a GPU adapter.
   const instance = await pipeline('text-generation', MODEL_ID, {
     dtype: 'q4',
-    device,
     progress_callback: (info) => {
       const progress = normalizedProgress(info?.progress);
       post('model-progress', {
@@ -28,34 +32,25 @@ async function createGenerator(device) {
       });
     },
   });
-  activeDevice = device;
+
   return instance;
 }
 
-async function ensureGenerator(preferWebGPU = true) {
+async function ensureGenerator() {
   if (generator) return generator;
   if (loadingPromise) return loadingPromise;
 
   loadingPromise = (async () => {
-    if (preferWebGPU) {
-      try {
-        generator = await createGenerator('webgpu');
-        post('model-ready', { device: 'webgpu', modelId: MODEL_ID });
-        return generator;
-      } catch (error) {
-        post('model-status', {
-          message: `WebGPU could not start (${error?.message || error}). Falling back to CPU/WASM…`,
-        });
-      }
-    }
-
-    generator = await createGenerator('wasm');
+    generator = await createGenerator();
     post('model-ready', { device: 'wasm', modelId: MODEL_ID });
     return generator;
   })();
 
   try {
     return await loadingPromise;
+  } catch (error) {
+    generator = null;
+    throw new Error(`CPU/WASM model backend could not start: ${error?.message || error}`);
   } finally {
     loadingPromise = null;
   }
@@ -72,7 +67,7 @@ function extractText(result) {
 }
 
 async function generate({ requestId, messages, maxNewTokens }) {
-  await ensureGenerator(Boolean(self.navigator?.gpu));
+  await ensureGenerator();
 
   let streamed = '';
   const streamer = new TextStreamer(generator.tokenizer, {
@@ -92,14 +87,14 @@ async function generate({ requestId, messages, maxNewTokens }) {
   });
 
   const finalText = extractText(result) || streamed.trim();
-  post('generation-complete', { requestId, text: finalText, device: activeDevice });
+  post('generation-complete', { requestId, text: finalText, device: 'wasm' });
 }
 
 self.addEventListener('message', async (event) => {
   const message = event.data || {};
   try {
     if (message.type === 'load') {
-      await ensureGenerator(Boolean(message.preferWebGPU));
+      await ensureGenerator();
       return;
     }
     if (message.type === 'generate') {
