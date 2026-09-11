@@ -65,10 +65,11 @@ model = AutoModelForCausalLM.from_pretrained(
     low_cpu_mem_usage=True,
 )
 try:
+    # ZeroGPU provides CUDA emulation while the Space starts, so the model can
+    # be placed on CUDA before a real GPU is allocated to a request.
     model = model.to("cuda")
 except Exception:
-    # ZeroGPU provides CUDA emulation during Space startup. This fallback keeps
-    # local development possible on machines without CUDA.
+    # Keep local development possible on machines without CUDA.
     model = model.to("cpu")
 model.eval()
 
@@ -103,23 +104,6 @@ def _generate(messages: list[dict], max_new_tokens: int) -> str:
 
     new_tokens = output[0, inputs["input_ids"].shape[1]:]
     return tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
-
-
-@spaces.GPU(duration=30)
-def generate_text(messages: list[dict], max_new_tokens: int) -> str:
-    return _generate(messages, max_new_tokens)
-
-
-@spaces.GPU(duration=30)
-def generate_hybrid(brief: str, max_new_tokens: int) -> str:
-    first_draft = _generate(
-        [
-            {"role": "system", "content": CORE_PRINCIPLES},
-            {"role": "user", "content": brief},
-        ],
-        max_new_tokens,
-    )
-    return _generate(review_prompt(brief, first_draft), max_new_tokens)
 
 
 def baseline_prompt(brief: str) -> list[dict]:
@@ -167,9 +151,10 @@ def review_prompt(brief: str, draft: str) -> list[dict]:
     ]
 
 
+@spaces.GPU(duration=30)
 def run_baseline(brief: str, max_new_tokens: int):
     brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
-    text = generate_text(baseline_prompt(brief), max_new_tokens)
+    text = _generate(baseline_prompt(brief), max_new_tokens)
     state = {"brief": brief, "text": text}
     return (
         text,
@@ -179,9 +164,10 @@ def run_baseline(brief: str, max_new_tokens: int):
     )
 
 
+@spaces.GPU(duration=30)
 def run_rules_first(brief: str, max_new_tokens: int):
     brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
-    text = generate_text(rules_first_prompt(brief), max_new_tokens)
+    text = _generate(rules_first_prompt(brief), max_new_tokens)
     return (
         text,
         "Rules-first version complete.",
@@ -189,11 +175,12 @@ def run_rules_first(brief: str, max_new_tokens: int):
     )
 
 
+@spaces.GPU(duration=30)
 def run_review(brief: str, max_new_tokens: int, baseline_state):
     brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
     if not baseline_state or baseline_state.get("brief") != brief:
         raise gr.Error("The brief changed after the baseline was generated. Generate a new baseline first.")
-    text = generate_text(
+    text = _generate(
         review_prompt(brief, baseline_state["text"]),
         max_new_tokens,
     )
@@ -204,17 +191,21 @@ def run_review(brief: str, max_new_tokens: int, baseline_state):
     )
 
 
+@spaces.GPU(duration=45)
 def run_hybrid(brief: str, max_new_tokens: int):
     brief, max_new_tokens = _validate_brief(brief, max_new_tokens)
-    text = generate_hybrid(brief, max_new_tokens)
+    first_draft = _generate(
+        [
+            {"role": "system", "content": CORE_PRINCIPLES},
+            {"role": "user", "content": brief},
+        ],
+        max_new_tokens,
+    )
+    text = _generate(review_prompt(brief, first_draft), max_new_tokens)
     return text, "Hybrid complete. You now have all four versions to compare."
 
 
-def choose_example(name: str):
-    return EXAMPLES.get(name, EXAMPLES["Community garden"])
-
-
-def reset_after_edit():
+def _reset_values():
     return (
         None,
         "",
@@ -229,6 +220,14 @@ def reset_after_edit():
         gr.update(interactive=False),
         gr.update(interactive=False),
     )
+
+
+def reset_after_edit():
+    return _reset_values()
+
+
+def choose_example_and_reset(name: str):
+    return (EXAMPLES.get(name, EXAMPLES["Community garden"]),) + _reset_values()
 
 
 CSS = """
@@ -334,8 +333,6 @@ The rulebook is a diagnostic tool, not a scorecard. Sometimes the baseline will 
 """
     )
 
-    example.change(fn=choose_example, inputs=example, outputs=brief)
-
     reset_outputs = [
         baseline_state,
         baseline_output,
@@ -350,7 +347,15 @@ The rulebook is a diagnostic tool, not a scorecard. Sometimes the baseline will 
         review_button,
         hybrid_button,
     ]
+
+    example.change(
+        fn=choose_example_and_reset,
+        inputs=example,
+        outputs=[brief] + reset_outputs,
+        queue=False,
+    )
     brief.input(fn=reset_after_edit, inputs=None, outputs=reset_outputs, queue=False)
+    max_tokens.change(fn=reset_after_edit, inputs=None, outputs=reset_outputs, queue=False)
 
     baseline_button.click(
         fn=run_baseline,
