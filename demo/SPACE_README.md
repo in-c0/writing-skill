@@ -20,7 +20,9 @@ The Space runs entirely in the visitor's browser with Transformers.js. It uses t
 - **Draft → review** — the exact baseline draft is reviewed against the full rulebook and minimally corrected.
 - **Hybrid** — core principles guide the initial draft, then the full rulebook is used for review.
 
-The browser demo uses `onnx-community/SmolLM2-360M-Instruct-ONNX` with quantized weights. The first run downloads the model to the browser cache; later runs reuse the cached files.
+The browser demo uses `onnx-community/SmolLM2-135M-Instruct-ONNX` with quantized weights. The first run downloads about 180 MB to the browser cache; later runs reuse the cached files. Inference runs in a Web Worker and streams partial output back to the interface so the page remains responsive.
+
+Readers can choose from several unrelated sample briefs—community garden, science explainer, workplace update, and repair-café introduction—or enter their own brief.
 
 This is not intended as a benchmark. It is a playground for seeing how prompting workflow changes prose and for comparing clarity, naturalness, usefulness, voice preservation, reader effort, recoverability, rhetorical over-engineering, rhythm, and genre fit.
 
