@@ -21,10 +21,14 @@ The first output is a normal baseline with no added writing instructions. After 
 
 Read each result before continuing. The useful question is not simply which version sounds more polished. Look for writing that is easier to follow, concrete where it should be concrete, natural in rhythm, and appropriate to the reader.
 
-This Space is static. It does not run a model on your computer and it does not use this Space owner's CPU quota. Generation is delegated through Hugging Face's public Gradio API to OpenBMB's official MiniCPM5 ZeroGPU demo. The playground tries the 2B demo first and can fall back to the 1B demo before the baseline is established.
+This Space is static. It does not run a model on Hugging Face CPU or ZeroGPU, and it does not download model weights to the reader's computer.
 
-Once the baseline has been generated, the same backend is kept for the rest of that comparison.
+Generation goes through Puter.js using NVIDIA Nemotron 3 Nano Omni:
 
-Public model Spaces are shared infrastructure. They can queue, rate-limit, sleep, change their API, or become temporarily unavailable. That dependency is intentionally stated here rather than hidden.
+`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`
+
+Puter currently lists that route at $0 for input and output. Puter may ask a visitor to sign in so it can associate AI usage with that person's account. No Puter API key is stored in this Space.
+
+The same model and settings are used for every stage in a comparison.
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with this static Space and are used to build the Rules-first and review prompts.
