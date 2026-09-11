@@ -4,7 +4,7 @@ A rulebook for agents that need to write clearly without turning every paragraph
 
 > Write for the reader, not for the performance of writing.
 
-The skill is meant for explanatory, educational, technical, and professional writing. It is also useful when editing existing text and you want to improve clarity without replacing the writer's voice with a generic "better" voice.
+The skill is useful for explanatory, educational, technical, and professional writing. It is also useful when editing existing text and you want to improve clarity without replacing the writer's voice with a generic "better" voice.
 
 **[Try the writing-skill playground on Hugging Face](https://huggingface.co/spaces/wldud5192/writing-skill-approach-lab)**
 
@@ -37,15 +37,19 @@ The first output is a **baseline** with no added writing instructions. After tha
 
 The useful comparison is not simply which version sounds more polished. Look at whether the writing is easier to follow, more concrete, less performative, easier to recover after a lapse in attention, and better matched to its reader and genre.
 
-### How the public playground runs
+## How the playground runs
 
-The Hugging Face Space itself is **static**, so it does not consume the owner's CPU Basic quota and readers do not download a model.
+The Hugging Face Space is a **static page**. It does not run a model on Hugging Face CPU or ZeroGPU, and readers do not download a model into their browser.
 
-When you generate text, the page calls an external public Hugging Face Gradio Space. It currently tries OpenBMB's official MiniCPM5-2B ZeroGPU demo first and can fall back to the 1B demo before the baseline is established. Once a backend produces the baseline, that same backend is used for every later stage in the comparison.
+Generation is handled in the browser through [Puter.js](https://puter.com/). The playground currently uses:
 
-The full `SKILL.md` and `CHECKLIST.md` are deployed with the page. Rules-first and review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
+`nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`
 
-This has an important tradeoff: public model Spaces are shared infrastructure. They can queue, rate-limit, sleep, change, or become temporarily unavailable. The playground shows that dependency rather than hiding it.
+Puter currently lists that route at $0 for input and output. The same model and generation settings are used for every stage in a comparison.
+
+Puter may ask a visitor to sign in so it can associate AI usage with that person's account. There is no Puter API key stored in this repository and no inference server for the project owner to fund or maintain.
+
+The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
 
 ## Written, spoken, and visual versions
 
@@ -64,8 +68,8 @@ SKILL.md                         main writing rulebook
 CHECKLIST.md                     compact review checklist
 AGENTS.md                        instructions for agents
 extensions/WRITTEN_SPOKEN.md    written / spoken / visual adaptation
-demo/static/                     static Hugging Face playground
-demo/SPACE_README.md             Space description
+demo/static/                     static playground
+demo/SPACE_README.md             Hugging Face Space description
 demo/deploy_to_hf.py             deployment script
 ```
 
@@ -81,7 +85,7 @@ python -m http.server 8000
 
 Then open `http://localhost:8000/demo/static/`.
 
-Generation still uses the external public Hugging Face model Space.
+Generation still goes through Puter.js, so the local page does not need model weights or an API key.
 
 ## Deployment
 
@@ -92,7 +96,7 @@ The repository uses two GitHub Actions settings:
 - secret `HF_TOKEN` — a Hugging Face token that can update the Space;
 - variable `HF_SPACE_REPO` — the target Space repository.
 
-The deploy script uploads the static interface together with the current rulebook files. It does not request paid or CPU-backed Space hardware.
+The deploy script uploads the static interface together with the current rulebook files. It does not request Hugging Face compute hardware.
 
 ## License
 
