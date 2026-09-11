@@ -1,5 +1,8 @@
-const MODEL_ID = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free";
+const API_URL = "https://text.pollinations.ai/openai";
+const MODEL_ID = "openai-fast";
+const MODEL_LABEL = "Pollinations openai-fast · GPT-OSS 20B";
 const MAX_TOKENS = 520;
+const REQUEST_TIMEOUT_MS = 90000;
 
 const EXAMPLES = {
   garden: "Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.",
@@ -56,6 +59,17 @@ function clean(text) {
     .trim();
 }
 
+function extractContent(value) {
+  if (typeof value === "string") return clean(value);
+  if (Array.isArray(value)) {
+    return clean(value.map((part) => {
+      if (typeof part === "string") return part;
+      return part?.text ?? part?.content ?? "";
+    }).join(""));
+  }
+  return "";
+}
+
 function setStage(stage, state, status) {
   const block = $(`stage-${stage}`);
   block.classList.remove("locked", "ready", "running", "complete", "error");
@@ -85,75 +99,84 @@ function resetFromBrief() {
   }
 }
 
-function baselinePrompt(brief) {
-  return brief;
+function baselineMessages(brief) {
+  return [{ role: "user", content: brief }];
 }
 
-function rulesPrompt(brief) {
-  return `Write the requested piece. Use the rulebook below while drafting. Specific instructions in the brief override general rules. Return only the finished writing.\n\nRULEBOOK\n${skill}\n\nWRITING BRIEF\n${brief}`;
+function rulesMessages(brief) {
+  return [
+    {
+      role: "system",
+      content: `Use the writing rulebook below while drafting. Specific instructions in the user's brief override general rules. Return only the finished writing.\n\nRULEBOOK\n${skill}`,
+    },
+    { role: "user", content: brief },
+  ];
 }
 
-function reviewPrompt(brief, draft) {
-  return `Revise the draft below using the rulebook diagnostically, not mechanically. A rule may require no change. Preserve what already works and make the smallest useful corrections. Return only the complete revised writing.\n\nRULEBOOK\n${skill}\n\n${checklist ? `FINAL CHECKLIST\n${checklist}\n\n` : ""}ORIGINAL BRIEF\n${brief}\n\nDRAFT TO REVIEW\n${draft}`;
+function reviewMessages(brief, draft) {
+  return [
+    {
+      role: "system",
+      content: `Revise an existing draft using the rulebook diagnostically, not mechanically. A rule may require no change. Preserve what already works and make the smallest useful corrections. Return only the complete revised writing.\n\nRULEBOOK\n${skill}${checklist ? `\n\nFINAL CHECKLIST\n${checklist}` : ""}`,
+    },
+    {
+      role: "user",
+      content: `ORIGINAL BRIEF\n${brief}\n\nDRAFT TO REVIEW\n${draft}`,
+    },
+  ];
 }
 
-function hybridDraftPrompt(brief) {
-  return `Use these core writing principles while drafting. Return only the finished writing.\n\n${CORE}\n\nWRITING BRIEF\n${brief}`;
+function hybridDraftMessages(brief) {
+  return [
+    {
+      role: "system",
+      content: `Use these core writing principles while drafting. Return only the finished writing.\n\n${CORE}`,
+    },
+    { role: "user", content: brief },
+  ];
 }
 
-function responseText(response) {
-  return clean(
-    response?.message?.content ??
-    response?.text ??
-    response?.content ??
-    response
-  );
-}
-
-async function puterGenerate(prompt, onText) {
-  if (!globalThis.puter?.ai?.chat) {
-    throw new Error("Puter.js did not load. Reload the page and try again.");
-  }
-
-  backendStatus.textContent = "Generating with the hosted free model… Puter may ask you to sign in once.";
+async function hostedGenerate(messages, onText) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  backendStatus.textContent = `Generating with ${MODEL_LABEL}… no sign-in required.`;
 
   try {
-    const stream = await puter.ai.chat(prompt, {
-      model: MODEL_ID,
-      stream: true,
-      max_tokens: MAX_TOKENS,
-      temperature: 0,
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: MODEL_ID,
+        messages,
+        temperature: 0,
+        seed: 42,
+        max_tokens: MAX_TOKENS,
+        reasoning_effort: "minimal",
+        stream: false,
+      }),
+      signal: controller.signal,
     });
 
-    let text = "";
-    for await (const part of stream) {
-      if (part?.text) {
-        text += part.text;
-        const cleaned = clean(text);
-        if (cleaned && onText) onText(cleaned);
-      }
+    if (!response.ok) {
+      const detail = clean(await response.text());
+      throw new Error(`Hosted model returned ${response.status}${detail ? `: ${detail.slice(0, 180)}` : ""}`);
     }
 
-    text = clean(text);
-    if (text) {
-      backendStatus.textContent = "Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route.";
-      return text;
+    const data = await response.json();
+    const text = extractContent(data?.choices?.[0]?.message?.content);
+    if (!text) throw new Error("The hosted model returned no text.");
+
+    if (onText) onText(text);
+    backendStatus.textContent = `${MODEL_LABEL} · anonymous hosted inference · no account required.`;
+    return text;
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("The hosted model took too long to respond. Try the stage again.");
     }
-  } catch (streamError) {
-    console.warn("Streaming generation failed; retrying once without streaming.", streamError);
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
   }
-
-  const response = await puter.ai.chat(prompt, {
-    model: MODEL_ID,
-    stream: false,
-    max_tokens: MAX_TOKENS,
-    temperature: 0,
-  });
-  const text = responseText(response);
-  if (!text) throw new Error("The hosted model returned no text.");
-  if (onText) onText(text);
-  backendStatus.textContent = "Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route.";
-  return text;
 }
 
 async function runStage(stage, work) {
@@ -176,7 +199,7 @@ buttons.baseline.addEventListener("click", async () => {
   if (!brief) return;
   await loadRules();
   await runStage("baseline", async () => {
-    baseline = await puterGenerate(baselinePrompt(brief), (text) => output("baseline", text));
+    baseline = await hostedGenerate(baselineMessages(brief), (text) => output("baseline", text));
     baselineBrief = brief;
     output("baseline", baseline);
     unlock("rules", "Ready. Generate a fresh answer with the rules supplied first.");
@@ -187,7 +210,7 @@ buttons.baseline.addEventListener("click", async () => {
 buttons.rules.addEventListener("click", async () => {
   const brief = briefEl.value.trim();
   await runStage("rules", async () => {
-    const text = await puterGenerate(rulesPrompt(brief), (value) => output("rules", value));
+    const text = await hostedGenerate(rulesMessages(brief), (value) => output("rules", value));
     output("rules", text);
     unlock("review", "Ready. Revise the exact baseline against the rulebook.");
     $("stage-review").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -201,7 +224,7 @@ buttons.review.addEventListener("click", async () => {
     return;
   }
   await runStage("review", async () => {
-    const text = await puterGenerate(reviewPrompt(brief, baseline), (value) => output("review", value));
+    const text = await hostedGenerate(reviewMessages(brief, baseline), (value) => output("review", value));
     output("review", text);
     unlock("hybrid", "Ready. Draft with core principles, then review that draft.");
     $("stage-hybrid").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -213,9 +236,9 @@ buttons.hybrid.addEventListener("click", async () => {
   buttons.hybrid.disabled = true;
   setStage("hybrid", "running", "Phase 1/2 · drafting with core principles…");
   try {
-    const draft = await puterGenerate(hybridDraftPrompt(brief), (value) => output("hybrid", value));
+    const draft = await hostedGenerate(hybridDraftMessages(brief), (value) => output("hybrid", value));
     setStage("hybrid", "running", "Phase 2/2 · reviewing that draft against the full rulebook…");
-    const finalText = await puterGenerate(reviewPrompt(brief, draft), (value) => output("hybrid", value));
+    const finalText = await hostedGenerate(reviewMessages(brief, draft), (value) => output("hybrid", value));
     output("hybrid", finalText);
     setStage("hybrid", "complete", "Complete. You now have all four versions to compare.");
   } catch (error) {
@@ -239,5 +262,5 @@ briefEl.addEventListener("input", () => {
   resetFromBrief();
 });
 
-backendStatus.textContent = "Hosted by Puter · NVIDIA Nemotron 3 Nano Omni · free route. No Hugging Face inference quota is used.";
+backendStatus.textContent = `${MODEL_LABEL} · anonymous hosted inference · no account required.`;
 resetFromBrief();
