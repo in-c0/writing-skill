@@ -35,17 +35,25 @@ function setProgress(value, visible = true) {
   progressEl.value = Math.max(0, Math.min(100, Number(value) || 0));
 }
 
-async function fetchText(path) {
-  const response = await fetch(path, { cache: 'no-cache' });
-  if (!response.ok) throw new Error(`Could not load ${path}: ${response.status}`);
-  return response.text();
+async function fetchFirst(paths) {
+  let lastError = null;
+  for (const path of paths) {
+    try {
+      const response = await fetch(path, { cache: 'no-cache' });
+      if (response.ok) return response.text();
+      lastError = new Error(`Could not load ${path}: ${response.status}`);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`Could not load ${paths.join(' or ')}`);
 }
 
 async function loadRules() {
   if (skill) return;
   [skill, checklist] = await Promise.all([
-    fetchText('./SKILL.md'),
-    fetchText('./CHECKLIST.md'),
+    fetchFirst(['./SKILL.md', '../../SKILL.md']),
+    fetchFirst(['./CHECKLIST.md', '../../CHECKLIST.md']),
   ]);
 }
 
