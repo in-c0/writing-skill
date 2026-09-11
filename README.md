@@ -23,11 +23,13 @@ The skill is especially useful for:
 - [`SKILL.md`](./SKILL.md) — canonical agent-facing rulebook.
 - [`CHECKLIST.md`](./CHECKLIST.md) — compact preflight and revision checklist.
 - [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) — adaptation rules for written vs spoken versions, equations, code, diagrams, tables, figures, companion material, and alternative rule-application workflows.
-- [`demo/app.py`](./demo/app.py) — interactive Hugging Face / Gradio comparison playground.
+- [`demo/static/`](./demo/static/) — source for the free in-browser Hugging Face comparison playground.
 
 ## Interactive approach lab
 
-The repository includes a small experiment for comparing four ways of applying the same writing skill to the same brief using the **same model and deterministic decoding**.
+**[▶ Try the Writing Skill Approach Lab on Hugging Face](https://huggingface.co/spaces/wldud5192/writing-skill-approach-lab)**
+
+The lab compares four ways of applying the same writing skill to the same brief using the **same model and deterministic decoding**.
 
 | Approach | What changes |
 | --- | --- |
@@ -36,31 +38,34 @@ The repository includes a small experiment for comparing four ways of applying t
 | **Draft → review** | The exact baseline draft is reviewed against the rulebook and minimally corrected. |
 | **Hybrid** | Core principles guide the first draft, then the full rulebook is used for review. |
 
-The default demo model is [`Qwen/Qwen2.5-1.5B-Instruct`](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct). The model can be changed with the `MODEL_ID` environment variable.
+The public demo runs `onnx-community/SmolLM2-360M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The first run downloads the quantized model; the browser cache is reused afterward.
 
 The goal is not to prove that one workflow always wins. Try different briefs and compare the actual writing. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
 
 Because **Draft → review** starts from the exact baseline produced in the same run, it gives a particularly direct view of what the rulebook changes after generation.
 
-### Run the lab locally
+### Run the browser lab locally
 
 ```bash
 git clone https://github.com/in-c0/writing-skill.git
 cd writing-skill
-pip install -r demo/requirements.txt
-python demo/app.py
+python -m http.server 8000
 ```
 
-### Publish it as a Hugging Face Space
+Then open `http://localhost:8000/demo/static/`.
+
+### Deployment
 
 The repo includes [`demo/deploy_to_hf.py`](./demo/deploy_to_hf.py) and a GitHub Actions workflow at [`.github/workflows/deploy-hf-space.yml`](./.github/workflows/deploy-hf-space.yml).
 
-The repository owner only needs to configure:
+The Space is a **static Hugging Face Space**. The model runs on each visitor's device, so the public demo does not require Hugging Face compute hosting.
+
+The repository owner configures:
 
 - GitHub secret `HF_TOKEN` — a Hugging Face token with permission to create/update the Space.
-- GitHub variable `HF_SPACE_REPO` — for example `your-hf-name/writing-skill-approach-lab`.
+- GitHub variable `HF_SPACE_REPO` — currently `wldud5192/writing-skill-approach-lab`.
 
-The workflow creates the Space if necessary and uploads the app, rulebook, and checklist. After the first deployment, add the public Space link here so readers can open the playground directly from the README.
+Changes to the rulebook, checklist, or demo automatically redeploy the Space.
 
 ## What this skill tries to prevent
 
