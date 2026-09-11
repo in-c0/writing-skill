@@ -12,8 +12,10 @@ on:
 
 jobs:
   deploy:
-    if: ${{ secrets.HF_TOKEN != '' && vars.HF_SPACE_REPO != '' }}
     runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SPACE_REPO: ${{ vars.HF_SPACE_REPO }}
     steps:
       - uses: actions/checkout@v4
 
@@ -21,11 +23,20 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "Missing repository secret: HF_TOKEN" >&2
+            exit 1
+          fi
+          if [ -z "$HF_SPACE_REPO" ]; then
+            echo "Missing repository variable: HF_SPACE_REPO" >&2
+            exit 1
+          fi
+
       - name: Install deploy dependency
         run: pip install "huggingface_hub>=0.27,<2"
 
       - name: Create or update Space
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_SPACE_REPO: ${{ vars.HF_SPACE_REPO }}
         run: python demo/deploy_to_hf.py
