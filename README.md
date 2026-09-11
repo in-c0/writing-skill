@@ -1,150 +1,92 @@
 # writing-skill
 
-A practical rulebook for agents that need to write clear, natural prose without defaulting to over-polished, generic AI copy.
-
-The central principle is simple:
+A rulebook for agents that need to write clearly without turning every paragraph into polished AI copy.
 
 > Write for the reader, not for the performance of writing.
 
-The skill is especially useful for:
+The skill is meant for explanatory, educational, technical, and professional writing. It is also useful when editing human-written text and you want to improve clarity without replacing the writer's voice with a generic "better" voice.
 
-- educational writing,
-- technical explanations,
-- textbooks and learning resources,
-- professional communication,
-- documentation,
-- nonfiction prose,
-- scripts and narration,
-- multimodal publishing across print, ebook, audiobook, and companion web material,
-- and editing existing human-written text without erasing its voice.
+**[Try the writing-skill playground on Hugging Face](https://huggingface.co/spaces/wldud5192/writing-skill-approach-lab)**
 
-## Files
+## Why this exists
 
-- [`SKILL.md`](./SKILL.md) — canonical agent-facing rulebook.
-- [`CHECKLIST.md`](./CHECKLIST.md) — compact preflight and revision checklist.
-- [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) — adaptation rules for written vs spoken versions, equations, code, diagrams, tables, figures, companion material, and alternative rule-application workflows.
-- [`demo/static/`](./demo/static/) — source for the free in-browser Hugging Face comparison playground.
+AI writing often becomes less natural as it becomes more polished. Ordinary sentences disappear. Paragraphs become too symmetrical. Simple points are turned into aphorisms. The prose starts announcing importance instead of explaining the subject.
 
-## Interactive approach lab
+`writing-skill` collects practical rules for avoiding that failure mode. It prefers clear explanations, concrete situations, useful repetition, stable terminology, natural connective language, and edits that solve a real reader-facing problem.
 
-**[▶ Try the Writing Skill Approach Lab on Hugging Face](https://huggingface.co/spaces/wldud5192/writing-skill-approach-lab)**
+The rules are defaults rather than bans. A speech, advertisement, manifesto, or literary passage may need a very different style.
 
-The lab compares four conditions using the **same model and deterministic decoding**:
+## Start here
 
-| Condition | What changes |
-| --- | --- |
-| **Baseline** | No added writing-style instructions. |
-| **Rules first** | A condensed, faithful digest of the rulebook is supplied before the model writes. |
-| **Draft → review** | The exact baseline draft is reviewed against the same condensed rules and minimally corrected. |
-| **Hybrid** | Core principles guide the first draft, followed by a separate review pass. |
+- [`SKILL.md`](./SKILL.md) is the main agent-facing rulebook.
+- [`CHECKLIST.md`](./CHECKLIST.md) is a shorter final review.
+- [`AGENTS.md`](./AGENTS.md) explains how an agent should use the repository.
+- [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) covers written, spoken, and visual versions of the same material, including equations, code, diagrams, tables, figures, and companion material.
 
-Rather than running every generation behind one button, the interface is a visible experiment pipeline:
+For most writing tasks, read `SKILL.md` before drafting and use `CHECKLIST.md` before delivery. When editing existing writing, preserve what already works and make the smallest change that improves the reader's experience.
 
-1. **Load model** — download and initialize the local model once.
-2. **Generate baseline** — enter or choose a brief and produce the no-instructions control output.
-3. **Approach 1: Rules first** — generate a fresh answer with the rules supplied before drafting.
-4. **Approach 2: Draft → review** — revise the exact baseline against the rules.
-5. **Approach 3: Hybrid** — draft with the core principles, then review that draft in a separate pass.
+## Try the different workflows
 
-Each stage unlocks after the previous one completes, so readers can inspect the output before deciding to spend compute on the next stage. There is no artificial short-word cap; readers control the output token budget in the baseline stage and the same budget is used throughout the comparison.
+There is no assumption that one prompting method will always work best. The playground keeps the model and writing brief fixed and lets you move through the approaches one at a time.
 
-The public demo runs `onnx-community/SmolLM2-360M-Instruct-ONNX` directly in the reader's browser with Transformers.js. No API key or paid inference server is required. The q4 model is about 386 MB; the browser cache is reused after the first download.
+The first output is a **baseline** with no added writing instructions. After that you can try:
 
-For compatibility, the public demo deliberately uses the browser's default **CPU/WASM** backend rather than requiring WebGPU. Inference runs inside a Web Worker and streams partial text back to the page, so the interface remains responsive while generation is happening.
+1. **Rules first** — give the model the rulebook before it writes.
+2. **Draft → review** — generate normally, then revise the exact baseline against the rulebook.
+3. **Hybrid** — draft with a small set of core principles, then review that draft against the full rulebook.
 
-The full `SKILL.md` is intentionally **not** inserted verbatim into every browser-model prompt. Small local models become slow and lose useful context when thousands of rulebook words are prepended. The live lab therefore uses a short agent-facing digest that preserves the rulebook's main constraints; the full source remains available for inspection in this repository.
+The useful comparison is not simply which version sounds more polished. Look at whether the writing is easier to follow, more concrete, less performative, easier to recover after a lapse in attention, and better matched to its reader and genre.
 
-The demo includes several unrelated example briefs—community garden, science explainer, workplace update, and repair-café introduction—or readers can enter their own.
+The playground uses `Qwen/Qwen2.5-1.5B-Instruct` with deterministic decoding. Generation runs on Hugging Face ZeroGPU, so visitors do not have to download a local model or provide an API key. The full `SKILL.md` and `CHECKLIST.md` are deployed with the Space, so the Rules-first and review stages use the same public rulebook as this repository.
 
-The goal is not to prove that one workflow always wins. Try different briefs and compare the actual writing. Look at clarity, naturalness, usefulness, voice preservation, reader effort, concreteness, recoverability, rhetorical over-engineering, rhythm, genre fit, and whether you would actually keep reading.
+ZeroGPU is shared infrastructure, so a request can occasionally wait for GPU capacity. Hugging Face also applies daily usage quotas; signed-in users receive more quota than anonymous visitors.
 
-Because **Draft → review** starts from the exact baseline produced for the same brief, it gives a particularly direct view of what the rulebook changes after generation.
+## Written, spoken, and visual versions
 
-### Run the browser lab locally
+A written version and a spoken version should not be forced into identical wording.
+
+The written version can rely on layout, equations, code, diagrams, tables, captions, and material the reader can inspect at their own pace. The spoken version should still make sense when the listener cannot see the page. Equations should usually be explained conceptually rather than read symbol by symbol; code should be explained through purpose and behavior rather than punctuation; figures and graphs should be described through the relationship or pattern the learner needs to notice.
+
+Material that genuinely needs to be seen can remain in the written edition or a companion site. The audio should orient the listener honestly rather than pretending that every visual can be replaced by words.
+
+See [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) for the full adaptation rules and workflow experiments.
+
+## Repository layout
+
+```text
+SKILL.md                         main writing rulebook
+CHECKLIST.md                     compact review checklist
+AGENTS.md                        instructions for agents
+extensions/WRITTEN_SPOKEN.md    written / spoken / visual adaptation
+demo/app.py                      hosted Hugging Face playground
+demo/SPACE_README.md             Space description and configuration
+demo/deploy_to_hf.py             deployment script
+```
+
+## Run the playground locally
+
+The public demo is designed for Hugging Face ZeroGPU. You can still run the Gradio app locally if you have enough memory; a CUDA GPU is recommended for useful generation speed.
 
 ```bash
 git clone https://github.com/in-c0/writing-skill.git
 cd writing-skill
-python -m http.server 8000
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r demo/requirements.txt
+python demo/app.py
 ```
 
-Then open `http://localhost:8000/demo/static/`.
+## Deployment
 
-### Deployment
+Changes to `SKILL.md`, `CHECKLIST.md`, or `demo/` automatically redeploy the Hugging Face Space through GitHub Actions.
 
-The repo includes [`demo/deploy_to_hf.py`](./demo/deploy_to_hf.py) and a GitHub Actions workflow at [`.github/workflows/deploy-hf-space.yml`](./.github/workflows/deploy-hf-space.yml).
+The repository uses two GitHub Actions settings:
 
-The Space is a **static Hugging Face Space**. The model runs on each visitor's device, so the public demo does not require Hugging Face compute hosting.
+- secret `HF_TOKEN` — a Hugging Face token that can update the Space;
+- variable `HF_SPACE_REPO` — the target Space repository.
 
-The repository owner configures:
+The deploy script uploads the current rulebook with the app and requests Hugging Face ZeroGPU hardware.
 
-- GitHub secret `HF_TOKEN` — a Hugging Face token with permission to create/update the Space.
-- GitHub variable `HF_SPACE_REPO` — currently `wldud5192/writing-skill-approach-lab`.
+## License
 
-Changes to the rulebook, checklist, or demo automatically redeploy the Space.
-
-## What this skill tries to prevent
-
-A common failure mode in AI-assisted writing is that the revision becomes more polished while becoming less alive. Typical symptoms include:
-
-- too many aphorisms,
-- abstract noun stacking,
-- constant rhetorical contrasts,
-- every paragraph having a neat takeaway,
-- unnecessary metaphors,
-- generic motivational language,
-- over-segmented paragraphs,
-- audience-persona enumeration,
-- inflated promises,
-- and prose that sounds designed to be quoted rather than simply understood.
-
-This skill treats those as editing risks, not as universal bans.
-
-## Default writing target
-
-For most explanatory and educational prose, aim for the feeling that a knowledgeable person is sitting beside the reader and explaining the subject naturally.
-
-That often means:
-
-- keeping some ordinary sentences,
-- repeating important terms instead of constantly finding synonyms,
-- using concrete situations,
-- allowing useful redundancy,
-- giving the reader recovery paths,
-- keeping rhetorical devices sparse,
-- and preserving the source voice during revision.
-
-## Written, spoken, and visual forms
-
-When material will exist in more than one medium, do not force identical wording across formats.
-
-Use a shared core narrative, then adapt it to the medium:
-
-- written/visual versions can use equations, code, diagrams, tables, layout, and cross-reference;
-- spoken versions should explain the underlying idea in a form that works by ear;
-- exact visual or interactive material can live in the written edition and/or companion website;
-- the audiobook should still communicate the core idea without requiring the listener to stare at a screen.
-
-See [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md).
-
-## Try different rule-application workflows
-
-Do not assume there is one universally best prompting strategy.
-
-The extension defines three useful experiments:
-
-- **Rules first** — show the agent the rules before generation.
-- **Draft first, then review** — generate a natural baseline, then inspect and revise it against the rules one item at a time.
-- **Hybrid** — provide the core principles before generation and apply detailed review afterward.
-
-When quality matters, generate more than one version from the same brief and compare the results. Judge clarity, naturalness, usefulness, voice, genre fit, recoverability, spoken rhythm, and factual fidelity—not just polish.
-
-## Usage
-
-Agents should read `SKILL.md` before substantial writing or rewriting tasks where naturalness, clarity, teaching quality, or voice preservation matters.
-
-Use `CHECKLIST.md` as the final review before delivery.
-
-If the task involves audiobook narration, spoken adaptation, equations, code, diagrams, figures, tables, or companion web material, also read `extensions/WRITTEN_SPOKEN.md`.
-
-Specific user instructions always override the defaults in this repository.
+Apache-2.0.
