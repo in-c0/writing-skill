@@ -63,7 +63,7 @@ The playground currently uses `inclusionai/ling-3.0-flash` with a fixed temperat
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and experimental review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
 
-Hosted inference is paid or quota-limited infrastructure even when the public interface is free to use. Availability therefore depends on the project owner's Vercel AI Gateway credits and limits. The backend has input and output caps so a public demo cannot submit arbitrarily large requests.
+Hosted inference is paid or quota-limited infrastructure even when the public interface is free to use. Availability therefore depends on the project owner's Vercel AI Gateway credits and limits. On the free tier, AI Gateway allows only a few requests to this model every few minutes, shared across all visitors, so a stage can report a rate limit; wait a few minutes and run that stage again. The backend has input and output caps so a public demo cannot submit arbitrarily large requests.
 
 Because writing submitted to the playground is sent to hosted inference, do not use the public demo for private or sensitive text.
 
@@ -126,6 +126,10 @@ The Space deployment uploads the static interface together with the current rule
 The production endpoint used by the playground is:
 
 `https://writing-skill-api.vercel.app/api/generate`
+
+Browsers may call it only from the Hugging Face Space origin (`https://wldud5192-writing-skill-approach-lab.static.hf.space`) and from `localhost` or `127.0.0.1` on any port. Other origins get a `403` JSON response. Set the `ALLOWED_ORIGINS` environment variable (comma-separated) on the Vercel project to allow more.
+
+The Vercel project is not linked to this GitHub repository, so pushing to `main` does not redeploy the backend. To deploy the current `api/generate.js`, run `vercel deploy --prod` from the repository root; `.vercelignore` keeps the rulebook and playground files out of that deployment.
 
 ## License
 

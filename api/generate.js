@@ -49,6 +49,7 @@ function setCors(req, res) {
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Expose-Headers", "Retry-After");
   res.setHeader("Access-Control-Max-Age", "86400");
   return allowed;
 }
@@ -153,8 +154,14 @@ function upstreamFailure(res, status, body) {
       detail
     });
   }
-  if (status === 402 || status === 429) {
-    return fail(res, 429, "upstream_quota", "The hosted model is rate limited or out of credits right now.", {
+  if (status === 429) {
+    return fail(res, 429, "upstream_rate_limited", "The hosted model is rate limited right now. Wait a few minutes and try again.", {
+      upstreamStatus: status,
+      detail
+    });
+  }
+  if (status === 402) {
+    return fail(res, 503, "upstream_quota", "The hosted model is out of credits.", {
       upstreamStatus: status,
       detail
     });
@@ -233,7 +240,12 @@ export default async function handler(req, res) {
     });
   }
 
-  if (!upstream.ok) return upstreamFailure(res, upstream.status, body);
+  if (!upstream.ok) {
+    // AI Gateway sometimes says how long to wait; pass that on so the page can show it.
+    const retryAfter = upstream.headers.get("retry-after");
+    if (retryAfter) res.setHeader("Retry-After", retryAfter);
+    return upstreamFailure(res, upstream.status, body);
+  }
 
   let text;
   try {

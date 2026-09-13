@@ -31,6 +31,8 @@ let skill = "";
 let checklist = "";
 let baseline = "";
 let baselineBrief = "";
+let hybridDraft = "";
+let hybridDraftBrief = "";
 
 async function fetchFirst(paths) {
   for (const path of paths) {
@@ -77,6 +79,8 @@ function unlock(stage, status) {
 function resetFromBrief() {
   baseline = "";
   baselineBrief = "";
+  hybridDraft = "";
+  hybridDraftBrief = "";
   buttons.baseline.disabled = false;
   setStage("baseline", "ready", "Ready.");
   output("baseline", "The baseline will appear here.");
@@ -126,16 +130,23 @@ function hybridDraftMessages(brief) {
 
 const ERROR_MESSAGES = {
   rate_limited: "Too many requests from this network in the last few minutes. Wait a little and try again.",
-  upstream_quota: "The hosted model is rate limited or out of credits right now. Try again later.",
+  upstream_rate_limited: "The hosted model is rate limited right now. The demo runs on a free tier that allows only a few generations every few minutes. Wait a few minutes, then try this stage again.",
+  upstream_quota: "The hosted model is out of credits. The playground owner needs to top up before it can generate again.",
   upstream_timeout: "The hosted model took too long to respond. Try the stage again.",
   upstream_auth: "The API could not authenticate with Vercel AI Gateway. This is a backend configuration problem, not something you can fix from this page.",
   origin_not_allowed: "The API refused this page's origin. The playground is misconfigured.",
   payload_too_large: "The brief or draft is too long for the hosted model. Shorten it and try again.",
 };
 
-function readableError(data, raw, status) {
+function readableError(data, raw, status, retryAfter) {
   const code = typeof data?.code === "string" ? data.code : "";
-  if (ERROR_MESSAGES[code]) return ERROR_MESSAGES[code];
+  if (ERROR_MESSAGES[code]) {
+    const seconds = Number(retryAfter);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return `${ERROR_MESSAGES[code]} (Retry after about ${Math.ceil(seconds)} seconds.)`;
+    }
+    return ERROR_MESSAGES[code];
+  }
   const base = typeof data?.error === "string" ? data.error : (raw ? raw.slice(0, 200) : `HTTP ${status}`);
   const detail = typeof data?.detail === "string" && data.detail ? ` ${data.detail}` : "";
   return `API error (HTTP ${status}): ${base}${detail}`.slice(0, 360);
@@ -170,7 +181,7 @@ async function hostedGenerate(messages, onText) {
       data = JSON.parse(raw);
     } catch (_) {}
 
-    if (!response.ok) throw new Error(readableError(data, raw, response.status));
+    if (!response.ok) throw new Error(readableError(data, raw, response.status, response.headers.get("retry-after")));
     if (!data) throw new Error("The playground API returned an unreadable response.");
 
     const text = clean(data.text);
@@ -260,11 +271,15 @@ buttons.hybrid.addEventListener("click", async () => {
   const brief = currentBrief("hybrid");
   if (!brief) return;
   buttons.hybrid.disabled = true;
-  setStage("hybrid", "running", "Phase 1/2 · drafting with core principles…");
   try {
-    const draft = await hostedGenerate(hybridDraftMessages(brief), (value) => output("hybrid", value));
+    // Keep a finished phase-1 draft so a retry after a rate limit only repeats phase 2.
+    if (!hybridDraft || hybridDraftBrief !== brief) {
+      setStage("hybrid", "running", "Phase 1/2 · drafting with core principles…");
+      hybridDraft = await hostedGenerate(hybridDraftMessages(brief), (value) => output("hybrid", value));
+      hybridDraftBrief = brief;
+    }
     setStage("hybrid", "running", "Phase 2/2 · reviewing that draft against the full rulebook…");
-    const finalText = await hostedGenerate(reviewMessages(brief, draft), (value) => output("hybrid", value));
+    const finalText = await hostedGenerate(reviewMessages(brief, hybridDraft), (value) => output("hybrid", value));
     output("hybrid", finalText);
     setStage("hybrid", "complete", "Complete. You now have all four versions to compare.");
   } catch (error) {

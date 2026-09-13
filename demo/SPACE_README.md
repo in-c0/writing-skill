@@ -30,4 +30,4 @@ The current model is `inclusionai/ling-3.0-flash`. Reasoning is disabled for thi
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with this Space. Rules first uses the rulebook as the normal workflow; Draft → review and Hybrid are included only as experimental comparison modes.
 
-Hosted inference still has owner-side credits and limits. The backend caps request size and output length, and availability depends on the project's Vercel AI Gateway allowance. Do not submit private or sensitive writing to this public playground.
+Hosted inference still has owner-side credits and limits. On the free tier, the model allows only a few generations every few minutes across all visitors, so a stage may report a rate limit; wait a few minutes and run it again. The backend caps request size and output length. Do not submit private or sensitive writing to this public playground.
