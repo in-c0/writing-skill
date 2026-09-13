@@ -22,6 +22,19 @@ The default target is not "maximally polished." It is:
 
 Do not optimize every sentence for elegance, compression, originality, emotional resonance, and memorability at once. That produces conspicuously engineered prose.
 
+## Default workflow: Rules first
+
+Use **Rules first** as the normal operating mode for this skill.
+
+1. Read this rulebook and any relevant extension before drafting or rewriting.
+2. Understand the brief, audience, genre, source material, and constraints.
+3. Write or revise with the rules active from the start.
+4. Run the final checklist before delivery.
+
+Do not routinely generate multiple workflow variants when the user asked for one piece of writing.
+
+**Draft → review** and **Hybrid** are experimental modes. Use them when deliberately evaluating prompting strategies, studying what the rulebook changes, diagnosing a draft, or when the user explicitly asks for a workflow comparison. They are not the default production path.
+
 ## 1. Start from the reader's problem
 
 Prefer the reader's immediate situation over the author's observation about the subject.
