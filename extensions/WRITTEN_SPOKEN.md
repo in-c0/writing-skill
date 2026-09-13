@@ -349,13 +349,11 @@ A reliable multimodal workflow is:
 
 ---
 
-# 13. Applying the writing rules: try more than one approach
+# 13. Applying the writing rules: default and experimental modes
 
-There is no single best way to use the writing rulebook with an AI system. Different models, genres, source texts, and prompts can respond better to different workflows.
+Use **Rules first** as the default workflow. The other workflows in this section are retained for experiments, evaluation, and diagnosis; they are not peer defaults.
 
-Users and agents are encouraged to generate multiple variants and compare them rather than assuming one prompting strategy is universally superior.
-
-## Approach A: Rules first
+## Default: Rules first
 
 Give the agent the relevant writing rules before generation, then ask it to write the piece.
 
@@ -365,23 +363,28 @@ Conceptually:
 1. Read SKILL.md.
 2. Read any relevant extension.
 3. Understand the brief, audience, genre, and source material.
-4. Generate the writing under those constraints.
+4. Generate or revise the writing with those constraints active.
 5. Run the final checklist.
 ```
 
-This is often efficient for writing from scratch because the first draft is already shaped by the desired style.
-
-Possible advantage:
-
-- fewer obvious AI-polish problems in the first draft.
+This is the normal production workflow because the first draft is already shaped by the desired style and does not require an extra generation pass merely to apply the rulebook.
 
 Possible risk:
 
 - the model may become overly self-conscious about the rules and produce cautious or flattened prose.
 
-## Approach B: Draft first, then review rule by rule
+If that risk appears in practice, diagnose the result directly. Do not switch every task into a multi-workflow experiment by default.
 
-Generate a draft without forcing every rule into the initial generation step. Then review the draft against the rulebook and revise where each rule exposes a real problem.
+## Experimental: Draft first, then review rule by rule
+
+This mode generates a draft without the rulebook, preserves it as a baseline, then reviews that draft against the rules.
+
+Use it when:
+
+- evaluating what the rulebook actually changes,
+- comparing prompting strategies,
+- diagnosing why a draft feels wrong,
+- or the user explicitly asks for this review process.
 
 Conceptually:
 
@@ -398,45 +401,38 @@ Conceptually:
 6. Run a final holistic read.
 ```
 
-This approach is especially useful when:
-
-- preserving an existing voice,
-- editing human writing,
-- diagnosing why prose feels wrong,
-- or studying which rules actually change the result.
-
-Possible advantage:
-
-- the agent can reason from concrete evidence in the draft instead of trying to obey many abstract constraints simultaneously.
+Never treat every rule as requiring a change. A review item may conclude: **no correction needed**.
 
 Possible risk:
 
 - mechanical rule-by-rule editing can overcorrect the prose, create contradictions between passes, or remove qualities that were working.
 
-Therefore, never treat every rule as requiring a change. A review item may conclude: **no correction needed**.
+## Experimental: Hybrid
 
-## Approach C: Hybrid
+This mode gives the agent only the core principles before drafting, then applies the detailed rulebook or checklist afterward.
 
-A useful default experiment is:
+Conceptually:
 
-1. Give the agent only the core principles before drafting.
+```text
+1. Give the agent the core principles before drafting.
 2. Generate a natural first version.
-3. Apply the detailed checklist afterward.
+3. Apply the detailed rulebook or checklist afterward.
 4. Make a small number of focused revision passes.
+```
 
-This often balances direction with spontaneity.
+Use Hybrid for experiments or when there is a specific reason to test whether lighter initial guidance preserves something that Rules first is flattening. It is not the default mode.
 
 ---
 
-# 14. Compare approaches experimentally
+# 14. Experimental workflow comparison
 
-When quality matters, produce multiple versions from the same brief.
+Workflow comparison is an evaluation tool, not a required production step.
 
-For example:
+When deliberately testing the skill, produce versions from the same brief such as:
 
-- **A — rules-first generation**
-- **B — draft-first + iterative rule review**
-- **C — hybrid**
+- **A — Rules first · default**
+- **B — Draft → review · experimental**
+- **C — Hybrid · experimental**
 
 Keep the source brief, factual inputs, intended audience, and required length as constant as possible.
 
@@ -470,13 +466,13 @@ Also ask:
 
 > Which changes improved the piece, and which only made the writing more noticeable?
 
-Keep the winning passages, not necessarily the winning workflow. Different sections may benefit from different methods.
+Keep useful findings from the experiment, but do not turn every normal writing request into a workflow bake-off.
 
 ---
 
-# 15. Iterative-review discipline
+# 15. Experimental iterative-review discipline
 
-When reviewing against the rules one item at a time:
+When using the Draft → review experiment:
 
 - preserve the original draft,
 - make minimal corrections,
