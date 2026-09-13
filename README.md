@@ -23,17 +23,33 @@ The rules are defaults rather than bans. A speech, advertisement, manifesto, or 
 - [`AGENTS.md`](./AGENTS.md) — how an agent should use the repository.
 - [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) — written, spoken, and visual versions of the same material, including equations, code, diagrams, tables, figures, and companion material.
 
-For most writing tasks, read `SKILL.md` before drafting and use `CHECKLIST.md` before delivery. When editing existing writing, preserve what already works and make the smallest change that improves the reader's experience.
+For most writing tasks, use **Rules first** as the default workflow: read `SKILL.md` before drafting or rewriting, apply the rules while producing the piece, then use `CHECKLIST.md` before delivery.
 
-## Try the workflows
+When editing existing writing, preserve what already works and make the smallest change that improves the reader's experience.
 
-There is no assumption that one prompting method will always work best. The playground keeps the writing brief and model fixed and lets you move through the approaches one at a time.
+## Workflow modes
 
-The first output is a **baseline** with no added writing instructions. After that you can try:
+### Default: Rules first
 
-1. **Rules first** — give the model the rulebook before it writes.
-2. **Draft → review** — generate normally, then revise the exact baseline against the rulebook.
-3. **Hybrid** — draft with a small set of core principles, then review that draft against the full rulebook.
+Give the model the rulebook before it writes. This is the normal operating mode for the skill.
+
+```text
+1. Read SKILL.md.
+2. Read any relevant extension.
+3. Understand the brief, audience, genre, source material, and constraints.
+4. Write or revise with the rules active from the start.
+5. Run CHECKLIST.md before delivery.
+```
+
+### Experimental: Draft → review
+
+Generate a normal draft first, preserve it as a baseline, then review it against the rulebook. This is useful for studying what the skill actually changes or for diagnosing a draft, but it is not the default workflow.
+
+### Experimental: Hybrid
+
+Draft with a smaller set of core principles, then review that draft against the full rulebook. This is also an experimental comparison mode rather than the default.
+
+The playground keeps the writing brief and model fixed so these modes can be compared. The baseline exists as a control for that experiment; it is not a recommended production mode.
 
 The useful comparison is not simply which version sounds more polished. Look at whether the writing is easier to follow, more concrete, less performative, easier to recover after a lapse in attention, and better matched to its reader and genre.
 
@@ -45,7 +61,7 @@ When the reader generates a version, the page sends the prompt to the project's 
 
 The playground currently uses `inclusionai/ling-3.0-flash` with a fixed temperature and output limit, with reasoning disabled. The same backend and generation settings are used for every stage in one comparison.
 
-The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
+The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and experimental review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
 
 Hosted inference is paid or quota-limited infrastructure even when the public interface is free to use. Availability therefore depends on the project owner's Vercel AI Gateway credits and limits. The backend has input and output caps so a public demo cannot submit arbitrarily large requests.
 
@@ -59,7 +75,7 @@ The written version can rely on layout, equations, code, diagrams, tables, capti
 
 Material that genuinely needs to be seen can remain in the written edition or a companion site. The audio should orient the listener honestly rather than pretending that every visual can be replaced by words.
 
-See [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) for the full adaptation rules and workflow experiments.
+See [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) for the full adaptation rules and experimental workflow comparisons.
 
 ## Repository layout
 
