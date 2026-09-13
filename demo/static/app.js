@@ -3,7 +3,7 @@ const MODEL_LABEL = "Vercel AI Gateway · Ling 3.0 Flash";
 const REQUEST_TIMEOUT_MS = 90000;
 const MAX_BRIEF_CHARS = 4000;
 // When the hosted model is rate limited, wait and retry instead of stopping.
-const RATE_LIMIT_RETRIES = 6;
+const RATE_LIMIT_RETRIES = 8;
 const RATE_LIMIT_WAIT_MS = 45000;
 
 const EXAMPLES = {

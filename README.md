@@ -63,7 +63,7 @@ The playground currently uses `inclusionai/ling-3.0-flash` with a fixed temperat
 
 The full `SKILL.md` and `CHECKLIST.md` are deployed with the static page. Rules-first and experimental review prompts therefore use the same public rulebook as this repository rather than a separate condensed copy.
 
-Hosted inference is paid or quota-limited infrastructure even when the public interface is free to use. Availability therefore depends on the project owner's Vercel AI Gateway credits and limits. On the free tier, AI Gateway allows only a few requests to this model every few minutes, shared across all visitors, so a stage can report a rate limit; wait a few minutes and run that stage again. The backend has input and output caps so a public demo cannot submit arbitrarily large requests.
+Hosted inference is paid or quota-limited infrastructure even when the public interface is free to use. Availability therefore depends on the project owner's Vercel AI Gateway credits and limits. The project runs on AI Gateway's free tier, which allows about five requests per five-minute window, shared across all visitors and models. One complete run of the four stages is five requests. When a stage is throttled, the page waits and retries on its own for up to about six minutes. The backend has input and output caps so a public demo cannot submit arbitrarily large requests.
 
 Because writing submitted to the playground is sent to hosted inference, do not use the public demo for private or sensitive text.
 
