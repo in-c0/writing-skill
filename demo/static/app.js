@@ -1,6 +1,7 @@
 const API_URL = "https://writing-skill-api.vercel.app/api/generate";
 const MODEL_LABEL = "Vercel AI Gateway · Ling 3.0 Flash";
 const REQUEST_TIMEOUT_MS = 90000;
+const MAX_BRIEF_CHARS = 4000;
 
 const EXAMPLES = {
   garden: "Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.",
@@ -123,16 +124,21 @@ function hybridDraftMessages(brief) {
   ];
 }
 
+const ERROR_MESSAGES = {
+  rate_limited: "Too many requests from this network in the last few minutes. Wait a little and try again.",
+  upstream_quota: "The hosted model is rate limited or out of credits right now. Try again later.",
+  upstream_timeout: "The hosted model took too long to respond. Try the stage again.",
+  upstream_auth: "The API could not authenticate with Vercel AI Gateway. This is a backend configuration problem, not something you can fix from this page.",
+  origin_not_allowed: "The API refused this page's origin. The playground is misconfigured.",
+  payload_too_large: "The brief or draft is too long for the hosted model. Shorten it and try again.",
+};
+
 function readableError(data, raw, status) {
-  if (typeof data?.error === "string") {
-    if (typeof data?.detail === "string" && data.detail) {
-      return `${data.error} ${data.detail}`.slice(0, 320);
-    }
-    return data.error;
-  }
-  if (typeof data?.detail === "string") return data.detail.slice(0, 320);
-  if (raw) return raw.slice(0, 320);
-  return `HTTP ${status}`;
+  const code = typeof data?.code === "string" ? data.code : "";
+  if (ERROR_MESSAGES[code]) return ERROR_MESSAGES[code];
+  const base = typeof data?.error === "string" ? data.error : (raw ? raw.slice(0, 200) : `HTTP ${status}`);
+  const detail = typeof data?.detail === "string" && data.detail ? ` ${data.detail}` : "";
+  return `API error (HTTP ${status}): ${base}${detail}`.slice(0, 360);
 }
 
 async function hostedGenerate(messages, onText) {
@@ -141,12 +147,22 @@ async function hostedGenerate(messages, onText) {
   backendStatus.textContent = `Generating with ${MODEL_LABEL}…`;
 
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages }),
-      signal: controller.signal,
-    });
+    let response;
+    try {
+      response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages }),
+        signal: controller.signal,
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") throw error;
+      // fetch() only rejects before a response exists: offline, DNS failure, the API being
+      // down, or the browser blocking a cross-origin response. Say so instead of "Failed to fetch".
+      throw new Error(
+        `Could not reach the playground API at ${new URL(API_URL).host}. Check your connection; if it is fine, the API may be down or blocking this page's origin (see the browser console).`
+      );
+    }
 
     const raw = await response.text();
     let data = null;
@@ -154,11 +170,10 @@ async function hostedGenerate(messages, onText) {
       data = JSON.parse(raw);
     } catch (_) {}
 
-    if (!response.ok) {
-      throw new Error(`Hosted model returned ${response.status}: ${readableError(data, raw, response.status)}`);
-    }
+    if (!response.ok) throw new Error(readableError(data, raw, response.status));
+    if (!data) throw new Error("The playground API returned an unreadable response.");
 
-    const text = clean(data?.text);
+    const text = clean(data.text);
     if (!text) throw new Error("The hosted model returned no text.");
 
     if (onText) onText(text);
@@ -189,11 +204,24 @@ async function runStage(stage, work) {
   }
 }
 
-buttons.baseline.addEventListener("click", async () => {
+function currentBrief(stage) {
   const brief = briefEl.value.trim();
+  if (!brief) {
+    setStage(stage, "error", "Write a brief first.");
+    return "";
+  }
+  if (brief.length > MAX_BRIEF_CHARS) {
+    setStage(stage, "error", `The brief is ${brief.length.toLocaleString()} characters. Keep it under ${MAX_BRIEF_CHARS.toLocaleString()}.`);
+    return "";
+  }
+  return brief;
+}
+
+buttons.baseline.addEventListener("click", async () => {
+  const brief = currentBrief("baseline");
   if (!brief) return;
-  await loadRules();
   await runStage("baseline", async () => {
+    await loadRules();
     baseline = await hostedGenerate(baselineMessages(brief), (text) => output("baseline", text));
     baselineBrief = brief;
     output("baseline", baseline);
@@ -203,7 +231,8 @@ buttons.baseline.addEventListener("click", async () => {
 });
 
 buttons.rules.addEventListener("click", async () => {
-  const brief = briefEl.value.trim();
+  const brief = currentBrief("rules");
+  if (!brief) return;
   await runStage("rules", async () => {
     const text = await hostedGenerate(rulesMessages(brief), (value) => output("rules", value));
     output("rules", text);
@@ -213,7 +242,8 @@ buttons.rules.addEventListener("click", async () => {
 });
 
 buttons.review.addEventListener("click", async () => {
-  const brief = briefEl.value.trim();
+  const brief = currentBrief("review");
+  if (!brief) return;
   if (!baseline || baselineBrief !== brief) {
     setStage("review", "error", "The brief changed. Generate a new baseline first.");
     return;
@@ -227,7 +257,8 @@ buttons.review.addEventListener("click", async () => {
 });
 
 buttons.hybrid.addEventListener("click", async () => {
-  const brief = briefEl.value.trim();
+  const brief = currentBrief("hybrid");
+  if (!brief) return;
   buttons.hybrid.disabled = true;
   setStage("hybrid", "running", "Phase 1/2 · drafting with core principles…");
   try {

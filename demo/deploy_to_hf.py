@@ -51,4 +51,4 @@ with tempfile.TemporaryDirectory() as tmp:
     )
 
 print(f"Deployed static Space: https://huggingface.co/spaces/{SPACE_REPO}")
-print("Inference is delegated to an external public Hugging Face model Space.")
+print("Generation runs through the project's Vercel endpoint; the Space itself stays static.")
