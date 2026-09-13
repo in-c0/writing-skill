@@ -12,12 +12,21 @@ The main default is:
 
 Preserve a user's existing voice unless they explicitly ask for a new one. Do not automatically make prose more polished, literary, corporate, inspirational, compressed, or rhetorically symmetrical.
 
-When applying the rulebook, do not assume a single workflow is best. Depending on the task, compare:
+## Default workflow: rules first
 
-1. rules-first generation,
-2. draft-first generation followed by iterative rule review,
-3. or a hybrid of the two.
+Use **rules-first generation** by default for substantial writing and rewriting:
 
-For iterative review, preserve the baseline draft, make only corrections justified by a real reader-facing problem, allow a rule check to conclude that no change is needed, and periodically reread the whole passage so local edits do not destroy global voice or flow.
+1. Read `SKILL.md` and any relevant extension.
+2. Understand the brief, audience, genre, source material, and constraints.
+3. Write or revise with those rules active from the start.
+4. Run `CHECKLIST.md` before delivery.
+
+Do not routinely generate several workflow variants when the user asked for one piece of writing.
+
+## Experimental workflows
+
+**Draft → review** and **Hybrid** are experimental modes. Use them when the user explicitly asks to compare prompting strategies, when evaluating the skill, or when a concrete diagnostic question makes the comparison useful.
+
+For experimental iterative review, preserve the baseline draft, make only corrections justified by a real reader-facing problem, allow a rule check to conclude that no change is needed, and periodically reread the whole passage so local edits do not destroy global voice or flow.
 
 Specific user instructions override the defaults in this repository.
