@@ -1,0 +1,205 @@
+name: Normalize writing workflow modes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/normalize-writing-workflow-modes.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Make Rules first the default mode
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          skill_path = Path("SKILL.md")
+          skill = skill_path.read_text(encoding="utf-8")
+          needle = "Do not optimize every sentence for elegance, compression, originality, emotional resonance, and memorability at once. That produces conspicuously engineered prose.\n\n## 1. Start from the reader's problem"
+          replacement = """Do not optimize every sentence for elegance, compression, originality, emotional resonance, and memorability at once. That produces conspicuously engineered prose.
+
+## Default workflow: Rules first
+
+Use **Rules first** as the normal operating mode for this skill.
+
+1. Read this rulebook and any relevant extension before drafting or rewriting.
+2. Understand the brief, audience, genre, source material, and constraints.
+3. Write or revise with the rules active from the start.
+4. Run the final checklist before delivery.
+
+Do not routinely generate multiple workflow variants when the user asked for one piece of writing.
+
+**Draft → review** and **Hybrid** are experimental modes. Use them when deliberately evaluating prompting strategies, studying what the rulebook changes, diagnosing a draft, or when the user explicitly asks for a workflow comparison. They are not the default production path.
+
+## 1. Start from the reader's problem"""
+          if needle not in skill:
+              raise SystemExit("SKILL.md insertion point not found")
+          skill_path.write_text(skill.replace(needle, replacement, 1), encoding="utf-8")
+
+          ext_path = Path("extensions/WRITTEN_SPOKEN.md")
+          ext = ext_path.read_text(encoding="utf-8")
+          new_workflows = r'''# 13. Applying the writing rules: default and experimental modes
+
+Use **Rules first** as the default workflow. The other workflows in this section are retained for experiments, evaluation, and diagnosis; they are not peer defaults.
+
+## Default: Rules first
+
+Give the agent the relevant writing rules before generation, then ask it to write the piece.
+
+Conceptually:
+
+```text
+1. Read SKILL.md.
+2. Read any relevant extension.
+3. Understand the brief, audience, genre, and source material.
+4. Generate or revise the writing with those constraints active.
+5. Run the final checklist.
+```
+
+This is the normal production workflow because the first draft is already shaped by the desired style and does not require an extra generation pass merely to apply the rulebook.
+
+Possible risk:
+
+- the model may become overly self-conscious about the rules and produce cautious or flattened prose.
+
+If that risk appears in practice, diagnose the result directly. Do not switch every task into a multi-workflow experiment by default.
+
+## Experimental: Draft first, then review rule by rule
+
+This mode generates a draft without the rulebook, preserves it as a baseline, then reviews that draft against the rules.
+
+Use it when:
+
+- evaluating what the rulebook actually changes,
+- comparing prompting strategies,
+- diagnosing why a draft feels wrong,
+- or the user explicitly asks for this review process.
+
+Conceptually:
+
+```text
+1. Generate the best natural draft from the brief.
+2. Preserve that draft as a baseline.
+3. Review it against the rulebook.
+4. For each relevant rule:
+   a. identify a concrete violation or weakness,
+   b. explain why it harms the reader,
+   c. make the smallest useful correction,
+   d. compare the revision with the previous version.
+5. Stop changing a passage when the revision is no longer better.
+6. Run a final holistic read.
+```
+
+Never treat every rule as requiring a change. A review item may conclude: **no correction needed**.
+
+Possible risk:
+
+- mechanical rule-by-rule editing can overcorrect the prose, create contradictions between passes, or remove qualities that were working.
+
+## Experimental: Hybrid
+
+This mode gives the agent only the core principles before drafting, then applies the detailed rulebook or checklist afterward.
+
+Conceptually:
+
+```text
+1. Give the agent the core principles before drafting.
+2. Generate a natural first version.
+3. Apply the detailed rulebook or checklist afterward.
+4. Make a small number of focused revision passes.
+```
+
+Use Hybrid for experiments or when there is a specific reason to test whether lighter initial guidance preserves something that Rules first is flattening. It is not the default mode.
+
+---
+
+# 14. Experimental workflow comparison
+
+Workflow comparison is an evaluation tool, not a required production step.
+
+When deliberately testing the skill, produce versions from the same brief such as:
+
+- **A — Rules first · default**
+- **B — Draft → review · experimental**
+- **C — Hybrid · experimental**
+
+Keep the source brief, factual inputs, intended audience, and required length as constant as possible.
+
+Then compare the outputs on criteria such as:
+
+- clarity,
+- naturalness,
+- usefulness,
+- voice preservation,
+- reader effort,
+- concreteness,
+- recoverability,
+- rhetorical over-engineering,
+- spoken rhythm,
+- genre fit,
+- and factual fidelity.
+
+When possible, compare versions without labeling which workflow produced them. This reduces preference for a method merely because it sounds more systematic.
+
+Do not ask only:
+
+> Which version is more polished?
+
+Also ask:
+
+> Which one would I rather keep reading?
+
+> Which one makes the idea easiest to understand?
+
+> Which one sounds most like a knowledgeable person actually trying to help me?
+
+> Which changes improved the piece, and which only made the writing more noticeable?
+
+Keep useful findings from the experiment, but do not turn every normal writing request into a workflow bake-off.
+
+---
+
+# 15. Experimental iterative-review discipline
+
+When using the Draft → review experiment:
+
+- preserve the original draft,
+- make minimal corrections,
+- do not rewrite unaffected passages automatically,
+- record the reason for a meaningful change when useful,
+- check whether a later correction damages an earlier strength,
+- periodically reread the entire passage rather than only the sentence under review,
+- and stop when further editing produces stylistic churn instead of reader benefit.
+
+The rulebook is a diagnostic instrument, not a machine for maximizing compliance.
+
+The purpose of iteration is to improve the reader's experience, not to achieve a perfect rule score.
+
+---
+
+# Final multimodal test'''
+          pattern = re.compile(r"# 13\. Applying the writing rules:.*?# Final multimodal test", re.S)
+          updated, count = pattern.subn(new_workflows, ext, count=1)
+          if count != 1:
+              raise SystemExit(f"Expected one workflow section, replaced {count}")
+          ext_path.write_text(updated, encoding="utf-8")
+
+      - name: Commit normalized workflow language
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add SKILL.md extensions/WRITTEN_SPOKEN.md
+          git diff --cached --check
+          git commit -m "Make Rules first the default writing workflow"
+          git push origin HEAD:main
