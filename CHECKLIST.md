@@ -65,15 +65,13 @@ If the material exists across print, ebook, audiobook, narration, or companion w
 
 See [`extensions/WRITTEN_SPOKEN.md`](./extensions/WRITTEN_SPOKEN.md) for the full adaptation rules.
 
-## Workflow comparison
+## Workflow mode
 
-When quality matters, consider producing more than one version:
+The default workflow is **rules first**: read the rulebook before drafting or rewriting, then use this checklist as the final review.
 
-- rules-first,
-- draft-first followed by iterative rule review,
-- and/or hybrid.
+**Draft → review** and **Hybrid** are experimental modes. Use them when deliberately evaluating prompting strategies, diagnosing what the rulebook changes, or when the user asks for a workflow comparison.
 
-Then ask:
+For an experimental comparison, ask:
 
 - Which version is clearest?
 - Which feels most natural?
