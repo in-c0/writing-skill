@@ -2,6 +2,9 @@ const API_URL = "https://writing-skill-api.vercel.app/api/generate";
 const MODEL_LABEL = "Vercel AI Gateway · Ling 3.0 Flash";
 const REQUEST_TIMEOUT_MS = 90000;
 const MAX_BRIEF_CHARS = 4000;
+// When the hosted model is rate limited, wait and retry instead of stopping.
+const RATE_LIMIT_RETRIES = 6;
+const RATE_LIMIT_WAIT_MS = 45000;
 
 const EXAMPLES = {
   garden: "Write a short welcome note for a community garden volunteer guide. Explain how a new volunteer can get started, what they should bring, and what to do if they are unsure about a task. Keep it friendly, clear, practical, and easy to read.",
@@ -130,7 +133,7 @@ function hybridDraftMessages(brief) {
 
 const ERROR_MESSAGES = {
   rate_limited: "Too many requests from this network in the last few minutes. Wait a little and try again.",
-  upstream_rate_limited: "The hosted model is rate limited right now. The demo runs on a free tier that allows only a few generations every few minutes. Wait a few minutes, then try this stage again.",
+  upstream_rate_limited: "The hosted model is still rate limited after several retries. The demo runs on a free tier that allows only a few generations every few minutes. Wait a while, then run this stage again; earlier results stay on the page.",
   upstream_quota: "The hosted model is out of credits. The playground owner needs to top up before it can generate again.",
   upstream_timeout: "The hosted model took too long to respond. Try the stage again.",
   upstream_auth: "The API could not authenticate with Vercel AI Gateway. This is a backend configuration problem, not something you can fix from this page.",
@@ -152,7 +155,7 @@ function readableError(data, raw, status, retryAfter) {
   return `API error (HTTP ${status}): ${base}${detail}`.slice(0, 360);
 }
 
-async function hostedGenerate(messages, onText) {
+async function requestOnce(messages) {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   backendStatus.textContent = `Generating with ${MODEL_LABEL}…`;
@@ -181,14 +184,16 @@ async function hostedGenerate(messages, onText) {
       data = JSON.parse(raw);
     } catch (_) {}
 
-    if (!response.ok) throw new Error(readableError(data, raw, response.status, response.headers.get("retry-after")));
+    if (!response.ok) {
+      const error = new Error(readableError(data, raw, response.status, response.headers.get("retry-after")));
+      error.code = typeof data?.code === "string" ? data.code : "";
+      error.retryAfter = Number(response.headers.get("retry-after")) || 0;
+      throw error;
+    }
     if (!data) throw new Error("The playground API returned an unreadable response.");
 
     const text = clean(data.text);
     if (!text) throw new Error("The hosted model returned no text.");
-
-    if (onText) onText(text);
-    backendStatus.textContent = `${MODEL_LABEL} · server-side inference · no reader sign-in required.`;
     return text;
   } catch (error) {
     if (error?.name === "AbortError") {
@@ -197,6 +202,33 @@ async function hostedGenerate(messages, onText) {
     throw error;
   } finally {
     window.clearTimeout(timer);
+  }
+}
+
+function pause(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+// Ask the API for a generation. If the hosted model is rate limited, wait and try
+// again a few times, showing a countdown, so the reader does not have to babysit it.
+async function hostedGenerate(messages, onText, onStatus) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const text = await requestOnce(messages);
+      if (onText) onText(text);
+      backendStatus.textContent = `${MODEL_LABEL} · server-side inference · no reader sign-in required.`;
+      return text;
+    } catch (error) {
+      const throttled = error?.code === "upstream_rate_limited" || error?.code === "rate_limited";
+      if (!throttled || attempt > RATE_LIMIT_RETRIES) throw error;
+      const waitMs = Math.min(error.retryAfter > 0 ? error.retryAfter * 1000 : RATE_LIMIT_WAIT_MS, 90000);
+      for (let left = Math.ceil(waitMs / 1000); left > 0; left--) {
+        const note = `The hosted model is rate limited (free tier). Retrying in ${left} s · attempt ${attempt} of ${RATE_LIMIT_RETRIES}.`;
+        if (onStatus) onStatus(note);
+        backendStatus.textContent = note;
+        await pause(1000);
+      }
+    }
   }
 }
 
@@ -233,7 +265,7 @@ buttons.baseline.addEventListener("click", async () => {
   if (!brief) return;
   await runStage("baseline", async () => {
     await loadRules();
-    baseline = await hostedGenerate(baselineMessages(brief), (text) => output("baseline", text));
+    baseline = await hostedGenerate(baselineMessages(brief), (text) => output("baseline", text), (note) => setStage("baseline", "running", note));
     baselineBrief = brief;
     output("baseline", baseline);
     unlock("rules", "Ready. Generate a fresh answer with the rules supplied first.");
@@ -245,7 +277,7 @@ buttons.rules.addEventListener("click", async () => {
   const brief = currentBrief("rules");
   if (!brief) return;
   await runStage("rules", async () => {
-    const text = await hostedGenerate(rulesMessages(brief), (value) => output("rules", value));
+    const text = await hostedGenerate(rulesMessages(brief), (value) => output("rules", value), (note) => setStage("rules", "running", note));
     output("rules", text);
     unlock("review", "Ready. Revise the exact baseline against the rulebook.");
     $("stage-review").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -260,7 +292,7 @@ buttons.review.addEventListener("click", async () => {
     return;
   }
   await runStage("review", async () => {
-    const text = await hostedGenerate(reviewMessages(brief, baseline), (value) => output("review", value));
+    const text = await hostedGenerate(reviewMessages(brief, baseline), (value) => output("review", value), (note) => setStage("review", "running", note));
     output("review", text);
     unlock("hybrid", "Ready. Draft with core principles, then review that draft.");
     $("stage-hybrid").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -275,11 +307,11 @@ buttons.hybrid.addEventListener("click", async () => {
     // Keep a finished phase-1 draft so a retry after a rate limit only repeats phase 2.
     if (!hybridDraft || hybridDraftBrief !== brief) {
       setStage("hybrid", "running", "Phase 1/2 · drafting with core principles…");
-      hybridDraft = await hostedGenerate(hybridDraftMessages(brief), (value) => output("hybrid", value));
+      hybridDraft = await hostedGenerate(hybridDraftMessages(brief), (value) => output("hybrid", value), (note) => setStage("hybrid", "running", `Phase 1/2 · ${note}`));
       hybridDraftBrief = brief;
     }
     setStage("hybrid", "running", "Phase 2/2 · reviewing that draft against the full rulebook…");
-    const finalText = await hostedGenerate(reviewMessages(brief, hybridDraft), (value) => output("hybrid", value));
+    const finalText = await hostedGenerate(reviewMessages(brief, hybridDraft), (value) => output("hybrid", value), (note) => setStage("hybrid", "running", `Phase 2/2 · ${note}`));
     output("hybrid", finalText);
     setStage("hybrid", "complete", "Complete. You now have all four versions to compare.");
   } catch (error) {
