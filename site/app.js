@@ -6,7 +6,6 @@
   const LIVE = `https://raw.githubusercontent.com/${REPO}/main/benchmark/results.json`;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let D, R;
 
   // ---------- theme (only changes when the user clicks)
@@ -71,25 +70,51 @@
   }
   function render(el, src) { el.innerHTML = md(src); markTells(el); }
 
-  // ---------- hero demo: one orchestrated before/after on load
+  // ---------- hero: read real excerpts before seeing the setup labels
   function heroDemo() {
-    const body = $("#demo-body"), marks = $("#demo-marks");
-    const pick = (src) => src.trim().split(/\n\s*\n/).slice(0, 4).join("\n\n");
-    const show = (v) => { render(body, pick(D.outputs["sales-1"][v])); $$("#demo-seg button").forEach((b) => b.setAttribute("aria-selected", b.dataset.v === v)); };
-    const setMarks = () => body.classList.toggle("marks-on", marks.checked);
-    $$("#demo-seg button").forEach((b) => b.addEventListener("click", () => { clearTimeout(heroDemo.t); show(b.dataset.v); }));
-    marks.addEventListener("change", setMarks);
-    show("baseline"); marks.checked = false; setMarks();
-    if (reduce) { marks.checked = true; setMarks(); return; }
-    setTimeout(() => { marks.checked = true; setMarks(); }, 700);
-    heroDemo.t = setTimeout(() => show("storyscope"), 3200);
+    let bid = "journal-1";
+    const excerpt = (src) => src.trim().split(/\n\s*\n/).filter((p) => !/^#{1,3}\s/.test(p)).slice(0, 2).join("\n\n");
+    const reveal = (pick) => {
+      $("#demo-reveal").textContent = pick
+        ? `You chose Version ${pick === "baseline" ? "A" : "B"}. A used no skill; B used StoryScope. Your choice is only yours and is not submitted anywhere.`
+        : "A used no skill; B used StoryScope. Both were written for exactly the same brief. Neither is human-authored.";
+      $("#demo-skip").hidden = true;
+      $$(".demo-vote").forEach((b) => {
+        b.disabled = true;
+        b.classList.toggle("picked", b.dataset.vote === pick);
+      });
+    };
+    const show = (next) => {
+      bid = next;
+      const br = R.briefs.find((b) => b.id === bid);
+      $("#demo-title").textContent = br.title;
+      $("#demo-brief").textContent = `The brief: ${br.prompt}`;
+      render($("#demo-a"), excerpt(D.outputs[bid].baseline));
+      render($("#demo-b"), excerpt(D.outputs[bid].storyscope));
+      $$("#demo-genres button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.brief === bid)));
+      $$(".demo-vote").forEach((b) => { b.disabled = false; b.classList.remove("picked"); });
+      $("#demo-reveal").textContent = "Both are unedited model outputs from the same brief. Pick one to reveal the setups, or simply keep reading.";
+      $("#demo-skip").hidden = false;
+    };
+    $$("#demo-genres button").forEach((b) => b.addEventListener("click", () => show(b.dataset.brief)));
+    $$(".demo-vote").forEach((b) => b.addEventListener("click", () => reveal(b.dataset.vote)));
+    $("#demo-skip").addEventListener("click", () => reveal(null));
+    $("#demo-full").addEventListener("click", () => {
+      const br = R.briefs.find((b) => b.id === bid);
+      genre = br.genre;
+      $$("#genre-seg button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.g === genre)));
+      fillBriefs();
+      $("#brief-sel").value = bid;
+      renderPanes();
+    });
+    show(bid);
   }
 
   // ---------- leaderboard
   const fmt = (x, d = 1) => (x == null ? "–" : (+x).toFixed(d));
   function board() {
     const rank = R.ranking, ov = R.overall, top = rank[0];
-    const fe = $("#hero-firsts"); if (fe && ov[top]) fe.textContent = `${ov[top].firsts} of ${ov[top].judgements}`;
+    const fe = $("#hero-firsts"); if (fe && ov.storyscope) fe.textContent = `${ov.storyscope.firsts} of ${ov.storyscope.judgements}`;
     $("#podium").innerHTML = rank.map((c, i) => `
       <button class="pod ${i === 0 ? "win" : ""}" data-c="${c}">
         ${i === 0 ? '<span class="crown" aria-hidden="true">👑</span>' : ""}
@@ -105,12 +130,17 @@
     const hb = (c) => { const xs = Object.keys(GENRE).map((g) => R.per_genre[g][c].human_bws).filter((x) => x != null); return xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null; };
     $("#board-table").innerHTML = `<thead><tr><th>Setup</th>${Object.values(GENRE).map((g) => `<th>${g}</th>`).join("")}<th>Average</th><th>Human best − worst</th></tr></thead><tbody>` +
       rank.map((c) => `<tr><td>${NAME[c]}</td>${Object.keys(GENRE).map((g) => { const v = R.per_genre[g][c].overall; return `<td class="${v === best[g] ? "best" : ""}">${fmt(v)}<span class="cell-bar"><i style="width:${(v || 0) * 10}%"></i></span></td>`; }).join("")}<td><b>${fmt(ov[c].judge_overall, 2)}</b></td><td>${hb(c) == null ? '<a href="#arena">add yours</a>' : (hb(c) > 0 ? "+" : "") + hb(c)}</td></tr>`).join("") + "</tbody>";
+    $("#brief-results").innerHTML = `<div class="table-wrap"><table><thead><tr><th>Brief</th><th>Opus first</th><th>Sonnet first</th></tr></thead><tbody>` +
+      R.briefs.map((br) => `<tr><td>${esc(br.title)}</td>${["opus-judge", "sonnet-judge"].map((judge) => {
+        const winners = CFG.filter((c) => R.per_brief[br.id]?.[c]?.judges?.[judge]?.rank === 1);
+        return `<td>${winners.map((c) => NAME[c]).join(" / ") || "–"}</td>`;
+      }).join("")}</tr>`).join("") + "</tbody></table></div>";
     const st = R.per_genre.story;
     const sig = (title, rows, cols) => `<h3>${title}</h3><div class="table-wrap"><table><thead><tr><th>Setup</th>${cols.map((c) => `<th>${c[0]}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
     $("#signals").innerHTML =
       sig("Short stories, StoryScope classifier (relative only)", rank.map((c) => `<tr><td>${NAME[c]}</td><td>${fmt(st[c].ssi, 2)}</td><td>${fmt(st[c].logit_full)}</td><td>${fmt(st[c].p_human, 0)}%</td></tr>`).join(""), [["AI-default index ↓"], ["Classifier log-odds human ↑"], ["Judge P(human)"]]) +
       sig("Surface polish lint, per 100 words (lower is fewer tells)", rank.map((c) => `<tr><td>${NAME[c]}</td>${Object.keys(GENRE).map((g) => `<td>${fmt(R.per_genre[g][c].lint, 2)}</td>`).join("")}</tr>`).join(""), Object.values(GENRE).map((g) => [g])) +
-      `<p class="small">Lint counts em dashes, "not X but Y", triads, stock words and one-line punch paragraphs. writing-skill cuts these hardest, yet judges still preferred StoryScope: removing tells is not the same as adding a voice. Human reviewers so far: ${R.human_reviewers}.</p>`;
+      `<p class="small">These are diagnostics, not quality or authorship tests. Lint counts em dashes, "not X but Y", triads, stock words and one-line punch paragraphs. The fiction classifier was trained on much longer text with a different annotator; its numbers here are not calibrated probabilities. Human reviewers so far: ${R.human_reviewers}.</p>`;
   }
 
   // ---------- compare
@@ -146,7 +176,7 @@
     }
   }
 
-  // ---------- arena: blind best/worst, ~1 minute per genre
+  // ---------- arena: blind best/worst, self-paced
   const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const plain = (src) => src.split(/\n\s*\n/).filter((b) => !/^#/.test(b.trim()) && !/^\*\*\[/.test(b.trim())).join(" ").replace(/[*_#>\[\]]/g, "").replace(/\s+/g, " ").trim();
   function excerpt(src) {
@@ -157,17 +187,14 @@
   const A = { round: 0, rounds: [], picks: {}, seconds: {} };
   function arena() {
     A.rounds = Object.keys(GENRE).map((g) => { const bs = R.briefs.filter((b) => b.genre === g); const b = bs[Math.floor(Math.random() * bs.length)]; return { g, b, order: shuffle(CFG) }; });
-    $("#arena-root").innerHTML = `<div class="ar-start"><p>You will see four anonymous pieces per round, showing their opening and closing lines. Pick the best and the worst. It takes about three minutes.</p><button class="btn" id="ar-go">Start round 1</button></div>`;
+    $("#arena-root").innerHTML = `<div class="ar-start"><p>You will see four anonymous pieces per round, showing their opening and closing lines. Expand any piece to read it in full. Take the time you need to choose a best and a worst.</p><button class="btn" id="ar-go">Start round 1</button></div>`;
     $("#ar-go").addEventListener("click", () => { A.round = 0; A.picks = {}; roundView(); });
   }
-  let tick;
   function roundView() {
     const r = A.rounds[A.round]; const st = { best: null, worst: null, t0: Date.now(), locked: false };
-    const C = 2 * Math.PI * 19;
     $("#arena-root").innerHTML = `
       <div class="ar-top">
-        <svg class="ring" viewBox="0 0 46 46" aria-hidden="true"><circle class="bg" cx="23" cy="23" r="19"/><circle class="fg" cx="23" cy="23" r="19" stroke-dasharray="${C}" stroke-dashoffset="0"/><text x="23" y="27.5" text-anchor="middle">60</text></svg>
-        <div class="ar-title">Round ${A.round + 1}: ${GENRE[r.g]}<small>${esc(r.b.prompt.slice(0, 120))}…</small></div>
+        <div class="ar-title">Round ${A.round + 1}: ${GENRE[r.g]}<small>${esc(r.b.prompt)}</small></div>
         <div class="ar-steps">${A.rounds.map((_, i) => `<i class="${i < A.round ? "done" : i === A.round ? "on" : ""}"></i>`).join("")}</div>
       </div>
       <div class="cards">${r.order.map((c, i) => `
@@ -179,8 +206,6 @@
           <div class="reveal" hidden></div>
         </div>`).join("")}</div>
       <div class="ar-foot"><button class="btn" id="ar-lock" disabled>Lock in picks</button></div>`;
-    const fg = $(".ring .fg"), tx = $(".ring text"); let left = 60;
-    clearInterval(tick); tick = setInterval(() => { left = Math.max(0, left - 1); tx.textContent = left; fg.style.strokeDashoffset = C * (1 - left / 60); if (left === 0) { fg.style.stroke = "var(--red)"; clearInterval(tick); } }, 1000);
     $$("#arena-root .card").forEach((card) => {
       const c = card.dataset.c;
       card.querySelector(".full").addEventListener("click", (e) => { const ex = card.querySelector(".ex"); if (ex.dataset.full) { ex.innerHTML = excerpt(D.outputs[r.b.id][c]); delete ex.dataset.full; e.target.textContent = "Read the full piece"; } else { ex.innerHTML = md(D.outputs[r.b.id][c]); ex.dataset.full = 1; e.target.textContent = "Show less"; } });
@@ -196,7 +221,7 @@
     });
     $("#ar-lock").addEventListener("click", () => {
       if (!st.locked) {
-        st.locked = true; clearInterval(tick);
+        st.locked = true;
         A.picks[r.b.id] = { best: st.best, worst: st.worst, shown: r.order }; A.seconds[r.b.id] = Math.round((Date.now() - st.t0) / 1000);
         $$("#arena-root .card").forEach((k, i) => { const rv = k.querySelector(".reveal"); rv.hidden = false; setTimeout(() => { rv.textContent = NAME[k.dataset.c]; k.classList.add("revealed"); }, i * 120); });
         $("#ar-lock").textContent = A.round < A.rounds.length - 1 ? `Next: ${GENRE[A.rounds[A.round + 1].g]}` : "See my results";
@@ -206,19 +231,28 @@
   function doneView() {
     const tally = Object.fromEntries(CFG.map((c) => [c, 0]));
     for (const p of Object.values(A.picks)) { tally[p.best]++; tally[p.worst]--; }
-    const payload = { v: 1, picks: A.picks, seconds: A.seconds, ua: navigator.language, at: new Date().toISOString() };
+    const payload = { v: 1, picks: A.picks, seconds: A.seconds, at: new Date().toISOString() };
     const body = `Thanks for judging! Submitting this issue adds your picks to the human column of the benchmark. A bot will merge it in a minute.\n\n\`\`\`json\n${JSON.stringify(payload, null, 1)}\n\`\`\`\n`;
     const url = `https://github.com/${REPO}/issues/new?title=${encodeURIComponent("[human-review] 3 rounds")}&body=${encodeURIComponent(body)}`;
-    $("#arena-root").innerHTML = `<div class="ar-done"><h3>Your picks</h3><p>Best counts +1, worst counts −1. Send them to the leaderboard with one GitHub issue; nothing is posted until you press Submit there.</p>
+    const comparisons = A.rounds.map((r) => {
+      const user = A.picks[r.b.id].best;
+      const judges = ["opus-judge", "sonnet-judge"].map((judge) => CFG.find((c) => R.per_brief[r.b.id]?.[c]?.judges?.[judge]?.rank === 1));
+      const agrees = judges.filter((c) => c === user).length;
+      return `<div class="ar-comparison"><strong>${GENRE[r.g]} · ${esc(r.b.title)}</strong><span>Your best: ${NAME[user]}</span><span>AI judges: ${judges.map((c) => NAME[c] || "No clear winner").join(" / ")}</span><small>${agrees} of 2 judges chose the same first place.</small></div>`;
+    }).join("");
+    $("#arena-root").innerHTML = `<div class="ar-done"><h3>Your picks, beside the judges'</h3><p>This tells you where your taste agrees or differs. It does not grade your taste. Your votes stay here unless you choose to submit them.</p>
+      <div class="ar-comparisons">${comparisons}</div>
+      <p>Across your three rounds, best counts +1 and worst counts −1:</p>
       <div class="ar-sum">${CFG.slice().sort((a, b) => tally[b] - tally[a]).map((c) => `<div><span>${NAME[c]}</span><b>${tally[c] > 0 ? "+" : ""}${tally[c]}</b></div>`).join("")}</div>
-      <a class="btn" href="${url}" target="_blank" rel="noopener">Send to leaderboard</a> <button class="btn ghost" id="ar-copy">Copy as JSON</button> <button class="btn ghost" id="ar-again">Judge again</button></div>`;
+      <p class="small">The public human tally is self-selected and not a representative study. Sending opens a prefilled GitHub issue; nothing is posted until you submit it there.</p>
+      <a class="btn" href="${url}" target="_blank" rel="noopener">Send to leaderboard (optional)</a> <button class="btn ghost" id="ar-copy">Copy as JSON</button> <button class="btn ghost" id="ar-again">Judge again</button></div>`;
     $("#ar-copy").addEventListener("click", (e) => copy(JSON.stringify(payload), e.target));
     $("#ar-again").addEventListener("click", arena);
   }
 
   // ---------- prompts + install tabs
   function prompts() {
-    const meta = { storyscope: ["StoryScope", "Best in this benchmark. Measured AI defaults, then deliberate departures."], "writing-skill-storyscope": ["writing-skill + StoryScope", "Reader-first rules plus the StoryScope map."], "writing-skill": ["writing-skill", "Reader-first rules that strip AI polish."] };
+    const meta = { storyscope: ["StoryScope", "Narrative-pattern guidance adapted from a fiction study."], "writing-skill-storyscope": ["writing-skill + StoryScope", "Reader-first rules with an experimental StoryScope layer."], "writing-skill": ["writing-skill", "Reader-first rules for clarity and voice preservation."] };
     const order = [R.ranking[0] === "merged" ? "writing-skill-storyscope" : R.ranking[0], "storyscope", "writing-skill-storyscope", "writing-skill"].filter((v, i, a) => meta[v] && a.indexOf(v) === i);
     $("#prompt-grid").innerHTML = order.map((k, i) => `<div class="pcard ${i === 0 ? "top-pick" : ""}"><h3>${meta[k][0]}${i === 0 ? " 👑" : ""}</h3><div class="meta">${meta[k][1]} · ${D.prompts[k].split(/\s+/).length} words</div><pre>${esc(D.prompts[k])}</pre><button class="btn" data-k="${k}">Copy prompt</button></div>`).join("");
     $$("#prompt-grid .btn").forEach((b) => b.addEventListener("click", () => copy(D.prompts[b.dataset.k] + " ", b)));
