@@ -1,10 +1,10 @@
 # writing-skill
 
-Agent skills that stop AI writing from sounding like AI, with a blind benchmark to show which one actually works.
+Agent writing skills, tested on the same briefs. Read the actual drafts first, then inspect the scores and their limitations.
 
-**Best performer: [`storyscope`](./skills/storyscope/)** — the measured map of where AI text clusters (61,575 stories, human vs five LLMs), packaged as a skill. Across journal posts, sales copy and short stories it took **9 of 12 blind first places**.
+**Best in this small pilot: [`storyscope`](./skills/storyscope/)** — guidance adapted from a study of narrative patterns in human and AI fiction. In six briefs written by one model, it took **9 of 12 first places** from two blind AI judges. A neutral-rubric re-judging gave the same first-place count, but the short-story averages were close (8.00 vs 7.75 for the unassisted control). These are early signals, not a general performance claim.
 
-**[Open the site](https://wldud5192-writing-skill.static.hf.space)** to read the outputs side by side, judge three rounds yourself, copy the prompts, or download the skills.
+**[Open the site](https://wldud5192-writing-skill.static.hf.space)** to read two anonymous openings, reveal the setups, compare all unedited outputs, examine brief-by-brief judging, or copy a prompt for your own writing.
 
 ```bash
 npx skills add in-c0/writing-skill --skill storyscope -g
@@ -25,7 +25,7 @@ Same model, same six briefs, four setups. Two AI editors (Opus and Sonnet) score
 
 What came out of it:
 
-- **StoryScope alone won every genre.** Judges' notes keep naming the same things: a real voice, dry humour, specific objects ("five $2 coins" for 32 g), endings that stop instead of explaining.
+- **StoryScope led the original rubric's genre averages.** Judges' notes point to a more distinct voice, dry humour, specific objects ("five $2 coins" for 32 g), and endings that stop instead of explaining. The neutral-rubric story result is far less conclusive.
 - **writing-skill alone removes the most surface tells but did not beat the control.** It had the lowest polish-lint score in every genre, and one judge summed up its product page as "clear and accurate but flat". Taking the AI polish out is not the same as putting a person in.
 - **The merged skill landed in between.** The reader-first rules pulled StoryScope's departures back toward plainness, which helped sales copy a little and cost the fiction some edge.
 - **The control won sales-2 (launch email) with both judges.** Short transactional copy is where the skills help least.
@@ -84,7 +84,7 @@ Same brief, opening lines. Full texts: [journal](./benchmark/outputs/journal-1/)
 
 ### Human reviews (welcome)
 
-The AI judges are from the same model family as the writer, so human picks are what make this result trustworthy. One review takes about three minutes: three rounds, four anonymous pieces each, pick the best and the worst.
+The AI judges are from the same model family as the writer. Optional human picks add another perspective, but participation is self-selected and cannot on its own validate the benchmark. Three self-paced rounds show four anonymous pieces each; pick the best and the worst.
 
 1. Go to the [judging rounds](https://wldud5192-writing-skill.static.hf.space/#arena).
 2. Press **Send to leaderboard** at the end. It opens a prefilled GitHub issue; submit it.
@@ -96,7 +96,7 @@ New briefs, new genres and reruns on other models are welcome as pull requests: 
 
 | Skill | What it does | Use it for |
 |---|---|---|
-| [`storyscope`](./skills/storyscope/) 👑 | Lists the choices AI text makes by default (with measured AI-vs-human rates), has the model pick deliberate departures before drafting, and ships the paper's human-vs-AI classifier to score a story. | Stories, personal posts, essays, product copy |
+| [`storyscope`](./skills/storyscope/) 👑 | Lists common AI fiction patterns (with measured AI-vs-human rates), has the model pick deliberate departures before drafting, and ships the paper's classifier as a diagnostic tool for stories. The non-fiction advice is an extrapolation, not a result of the paper. | Stories; experimental use in personal posts and story-driven copy |
 | [`writing-skill-storyscope`](./skills/writing-skill-storyscope/) | The full reader-first rulebook plus the StoryScope layer. | Long explanatory or teaching material that also needs a voice |
 | [`writing-skill`](./skills/writing-skill/) | The original rulebook: write for the reader, strip AI polish, keep the writer's voice when editing. | Docs, tutorials, editing someone else's draft |
 
@@ -134,7 +134,7 @@ python skills/storyscope/scripts/ai_default_index.py work/story.features.json   
 - **StoryScope classifier (stories only):** each story was annotated on the paper's 304 features with its own prompts (Claude Sonnet as annotator, blind), then scored by the released XGBoost models. As a calibration check, the same annotator rated a known Claude story from the paper's dev set at an AI-default index of 0.53 where the paper's own annotation gives 0.80, so this annotator is more lenient and its absolute numbers are not comparable to the paper. The ordering is the useful part: control 0.18, writing-skill 0.07, merged 0.05, StoryScope 0.00.
 - **Polish lint:** a deliberately crude count of em dashes, "not X but Y", triads, stock words and one-line punch paragraphs per 100 words ([`polish_lint.py`](./benchmark/tools/polish_lint.py)).
 
-**Limits.** Twelve judgements per setup is small. The judges share a model family with the writer and may share its taste. One writing model was tested. Treat the result as a strong first signal, and help turn it into a solid one with a human review.
+**Limits.** Twelve judgements per setup is small. The judges share a model family with the writer and may share its taste. One writing model was tested. The original study covered long-form fiction, not the sales copy and personal posts included here. Its released feature table contains 61,575 rows from a 61,608-story corpus. Treat classifier results as relative diagnostics, not calibrated authorship probabilities or quality grades. Additional blind reviews and independently repeated tests are needed before generalizing.
 
 ## The rulebook (writing-skill)
 
