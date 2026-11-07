@@ -1,0 +1,35 @@
+name: Deploy site
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "skills/**"
+      - "prompts/**"
+      - "benchmark/**"
+      - "scripts/build_site.py"
+      - "scripts/deploy_site_to_hf.py"
+      - ".github/workflows/deploy-site.yml"
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_SITE_REPO: ${{ vars.HF_SITE_REPO }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install "huggingface_hub>=0.27,<2"
+      - name: Build
+        run: python scripts/build_site.py
+      - name: Deploy to Hugging Face Space
+        run: python scripts/deploy_site_to_hf.py
