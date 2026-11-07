@@ -1,0 +1,1797 @@
+{
+ "configs": {
+  "baseline": "No skill (control)",
+  "writing-skill": "writing-skill",
+  "merged": "writing-skill + StoryScope",
+  "storyscope": "StoryScope only"
+ },
+ "genres": {
+  "journal": "Journal / blog post",
+  "sales": "Sales copy",
+  "story": "Short story"
+ },
+ "briefs": [
+  {
+   "id": "journal-1",
+   "genre": "journal",
+   "title": "First month as an indie developer",
+   "prompt": "Write a personal journal-style blog post (about 600 words) about my first month after quitting a salaried software job to build small indie apps. It was lonelier and slower than I expected, I shipped two tiny apps that almost nobody downloaded, and I'm still not sure it was the right call. Write it in first person, ready to publish."
+  },
+  {
+   "id": "journal-2",
+   "genre": "journal",
+   "title": "Injured before the half marathon",
+   "prompt": "Write a personal journal-style blog post (about 600 words) about training four months for my first half marathon and then straining my calf three weeks before race day. Write it in first person, ready to publish on my blog."
+  },
+  {
+   "id": "sales-1",
+   "genre": "sales",
+   "title": "Workshop fountain pen",
+   "prompt": "Write the product page copy (about 250 words: a headline, a short intro, three short sections, and a call to action) for the Laneway Pen: a refillable stainless-steel fountain pen made by a two-person workshop in Melbourne. It costs AUD 140, takes standard international cartridges or a converter, weighs 32 g, and comes with a lifetime nib-replacement promise."
+  },
+  {
+   "id": "sales-2",
+   "genre": "sales",
+   "title": "Job-site app for renovation crews",
+   "prompt": "Write a launch email (about 250 words, with a subject line) for Punchlist, a mobile app for small renovation crews (2 to 10 people) that turns photos of a job site into a shared task list with due dates. It works offline, costs USD 12 per user per month, and has a 14-day free trial. The audience is small-builder business owners who currently run jobs over group texts."
+  },
+  {
+   "id": "story-1",
+   "genre": "story",
+   "title": "The birthday candle",
+   "prompt": "Write a short story (about 1,200 words). Premise: a night-shift pharmacist notices that the same customer comes in every week and buys a single birthday candle."
+  },
+  {
+   "id": "story-2",
+   "genre": "story",
+   "title": "The storage unit",
+   "prompt": "Write a short story (about 1,200 words). Premise: two estranged sisters have one weekend to clear out their late father's storage unit before the lease runs out."
+  }
+ ],
+ "per_genre": {
+  "journal": {
+   "baseline": {
+    "overall": 5.25,
+    "human": 4.25,
+    "job": 6.75,
+    "specific": 5.75,
+    "p_human": 28.75,
+    "rank": 4,
+    "lint": 0.24,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "writing-skill": {
+    "overall": 6,
+    "human": 6.25,
+    "job": 6.75,
+    "specific": 6.25,
+    "p_human": 50,
+    "rank": 3,
+    "lint": 0.07,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "merged": {
+    "overall": 8,
+    "human": 7.75,
+    "job": 8,
+    "specific": 7.5,
+    "p_human": 65,
+    "rank": 2,
+    "lint": 0.08,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "storyscope": {
+    "overall": 8.75,
+    "human": 8,
+    "job": 9,
+    "specific": 9,
+    "p_human": 70.75,
+    "rank": 1,
+    "lint": 0.09,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 4,
+    "n_judgements": 4
+   }
+  },
+  "sales": {
+   "baseline": {
+    "overall": 6.5,
+    "human": 5.75,
+    "job": 7,
+    "specific": 6.5,
+    "p_human": 40,
+    "rank": 2.25,
+    "lint": 1.12,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 2,
+    "n_judgements": 4
+   },
+   "writing-skill": {
+    "overall": 5,
+    "human": 5,
+    "job": 6,
+    "specific": 5,
+    "p_human": 33.75,
+    "rank": 3.75,
+    "lint": 0.39,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "merged": {
+    "overall": 6.75,
+    "human": 6.75,
+    "job": 7.5,
+    "specific": 6.5,
+    "p_human": 51.25,
+    "rank": 2.5,
+    "lint": 1.13,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "storyscope": {
+    "overall": 8,
+    "human": 7.75,
+    "job": 8.5,
+    "specific": 8,
+    "p_human": 61.25,
+    "rank": 1.5,
+    "lint": 0.93,
+    "ssi": null,
+    "logit_full": null,
+    "logit_narr": null,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 2,
+    "n_judgements": 4
+   }
+  },
+  "story": {
+   "baseline": {
+    "overall": 6,
+    "human": 4.5,
+    "job": 7.5,
+    "specific": 6.75,
+    "p_human": 27,
+    "rank": 3.75,
+    "lint": 1.38,
+    "ssi": 0.18,
+    "logit_full": -1.93,
+    "logit_narr": -0.69,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "writing-skill": {
+    "overall": 6.75,
+    "human": 7,
+    "job": 7.25,
+    "specific": 7.25,
+    "p_human": 56.75,
+    "rank": 3,
+    "lint": 0.9,
+    "ssi": 0.07,
+    "logit_full": 10.16,
+    "logit_narr": 5.64,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 0,
+    "n_judgements": 4
+   },
+   "merged": {
+    "overall": 8.25,
+    "human": 8,
+    "job": 8.25,
+    "specific": 8.75,
+    "p_human": 66,
+    "rank": 1.75,
+    "lint": 1.05,
+    "ssi": 0.05,
+    "logit_full": 8.05,
+    "logit_narr": 8.64,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 1,
+    "n_judgements": 4
+   },
+   "storyscope": {
+    "overall": 8.75,
+    "human": 8.75,
+    "job": 8.75,
+    "specific": 9,
+    "p_human": 74.25,
+    "rank": 1.5,
+    "lint": 0.94,
+    "ssi": 0.0,
+    "logit_full": 10.82,
+    "logit_narr": 10.54,
+    "human_bws": null,
+    "human_n": 0,
+    "firsts": 3,
+    "n_judgements": 4
+   }
+  }
+ },
+ "per_brief": {
+  "journal-1": {
+   "baseline": {
+    "lint": {
+     "words": 610,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 1,
+     "per_100w": 0.33
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 4,
+      "specific": 6,
+      "overall": 5,
+      "p_human": 25,
+      "rank": 4,
+      "note": "Headered listicle structure, aphoristic closers ('silence gives you nothing to fix'), tidy lessons.",
+      "blind_label": "D"
+     },
+     "sonnet-judge": {
+      "job": 6,
+      "human": 4,
+      "specific": 5,
+      "overall": 5,
+      "p_human": 30,
+      "rank": 4,
+      "note": "Header-sectioned template structure, stated feelings, neat lessons; some nice lines but formulaic.",
+      "blind_label": "B"
+     }
+    }
+   },
+   "writing-skill": {
+    "lint": {
+     "words": 643,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 0.0
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 7,
+      "specific": 6,
+      "overall": 6,
+      "p_human": 50,
+      "rank": 3,
+      "note": "Sincere and plain, believable; flat voice, kettle clich\u00e9, tidy month-two resolution.",
+      "blind_label": "B"
+     },
+     "sonnet-judge": {
+      "job": 6,
+      "human": 6,
+      "specific": 6,
+      "overall": 6,
+      "p_human": 55,
+      "rank": 3,
+      "note": "Honest, plain, concrete numbers; competent but flat, tidy plan-for-month-two ending.",
+      "blind_label": "A"
+     }
+    }
+   },
+   "merged": {
+    "lint": {
+     "words": 670,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 0.0
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 8,
+      "specific": 8,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 2,
+      "note": "Natural, wry; curled card, 'ok' review, quiet CV update land; train/paddock metaphor slightly staged.",
+      "blind_label": "C"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 8,
+      "overall": 8,
+      "p_human": 65,
+      "rank": 2,
+      "note": "Lived-in details: curling card, 'ok' review, sunglasses bot; one train metaphor, tidy-ish close.",
+      "blind_label": "C"
+     }
+    }
+   },
+   "storyscope": {
+    "lint": {
+     "words": 580,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 1,
+     "per_100w": 0.17
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 9,
+      "human": 7,
+      "specific": 9,
+      "overall": 8,
+      "p_human": 55,
+      "rank": 1,
+      "note": "Funniest, sharpest details (Dan's tip text, cafe order); a few aphoristic lines; mum/Mac joke slightly inconsistent.",
+      "blind_label": "A"
+     },
+     "sonnet-judge": {
+      "job": 9,
+      "human": 8,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 75,
+      "rank": 1,
+      "note": "Distinct wry voice, named apps, Dan's texts, cafe order; a few polished punchlines.",
+      "blind_label": "D"
+     }
+    }
+   }
+  },
+  "journal-2": {
+   "baseline": {
+    "lint": {
+     "words": 677,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 1,
+     "per_100w": 0.15
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 4,
+      "specific": 6,
+      "overall": 5,
+      "p_human": 20,
+      "rank": 4,
+      "note": "Staged lines, triads, kelpie-man callback with sentimental 'holding on to that' close read as AI.",
+      "blind_label": "D"
+     },
+     "sonnet-judge": {
+      "job": 7,
+      "human": 5,
+      "specific": 6,
+      "overall": 6,
+      "p_human": 40,
+      "rank": 4,
+      "note": "Vivid kelpie man, but staged profundity, callback ending, and 'most important object' flourishes feel crafted.",
+      "blind_label": "B"
+     }
+    }
+   },
+   "writing-skill": {
+    "lint": {
+     "words": 647,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 1,
+     "per_100w": 0.15
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 6,
+      "specific": 7,
+      "overall": 6,
+      "p_human": 40,
+      "rank": 3,
+      "note": "Useful concrete details, but 'let me back up' and tidy 18km-vs-8km consolation ending feel templated.",
+      "blind_label": "B"
+     },
+     "sonnet-judge": {
+      "job": 7,
+      "human": 6,
+      "specific": 6,
+      "overall": 6,
+      "p_human": 55,
+      "rank": 3,
+      "note": "Clean, credible, well-paced; plain and a bit tidy, with a mild moral ending.",
+      "blind_label": "A"
+     }
+    }
+   },
+   "merged": {
+    "lint": {
+     "words": 621,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 0.16
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 8,
+      "specific": 7,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 2,
+      "note": "Understated, honest; lowballing pain scores and bib by fruit bowl land. Ending restrained, slightly flat.",
+      "blind_label": "A"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 8,
+      "specific": 7,
+      "overall": 8,
+      "p_human": 75,
+      "rank": 2,
+      "note": "Honest self-blame, bib on the bench, understated ending; fewer standout details than C.",
+      "blind_label": "D"
+     }
+    }
+   },
+   "storyscope": {
+    "lint": {
+     "words": 649,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 0.0
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 9,
+      "human": 8,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 65,
+      "rank": 1,
+      "note": "Vivid local texture (Gaytime, servo, MAFS); sharp unresolved ending. Quirks occasionally stacked for effect.",
+      "blind_label": "C"
+     },
+     "sonnet-judge": {
+      "job": 9,
+      "human": 9,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 88,
+      "rank": 1,
+      "note": "Gary the blister, Golden Gaytime at servo, Friday deadline ending; wry, specific, unresolved.",
+      "blind_label": "C"
+     }
+    }
+   }
+  },
+  "sales-1": {
+   "baseline": {
+    "lint": {
+     "words": 200,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 3,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 1.5
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 6,
+      "human": 4,
+      "specific": 4,
+      "overall": 5,
+      "p_human": 20,
+      "rank": 4,
+      "note": "Slogan headlines, tidy 'one pen, for good' ending; generic durability claims, short on texture.",
+      "blind_label": "D"
+     },
+     "sonnet-judge": {
+      "job": 6,
+      "human": 4,
+      "specific": 5,
+      "overall": 5,
+      "p_human": 25,
+      "rank": 3,
+      "note": "Slogan-ish headline and closer, tidy triads, polished but formulaic; less warmth.",
+      "blind_label": "D"
+     }
+    }
+   },
+   "writing-skill": {
+    "lint": {
+     "words": 259,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 0.0
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 6,
+      "human": 5,
+      "specific": 5,
+      "overall": 5,
+      "p_human": 35,
+      "rank": 3,
+      "note": "Clear and accurate but flat; meta line about worries, price repeated thrice, little voice.",
+      "blind_label": "A"
+     },
+     "sonnet-judge": {
+      "job": 6,
+      "human": 5,
+      "specific": 5,
+      "overall": 5,
+      "p_human": 35,
+      "rank": 4,
+      "note": "Competent but bland; fills the brief, no voice, repetitive price and workshop mentions.",
+      "blind_label": "A"
+     }
+    }
+   },
+   "merged": {
+    "lint": {
+     "words": 266,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 3,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 1.13
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 7,
+      "overall": 7,
+      "p_human": 55,
+      "rank": 2,
+      "note": "Warm, concrete everyday uses; cat joke works; CTA is soft and lacks a button.",
+      "blind_label": "C"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 7,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 2,
+      "note": "Warm and credible, nice birthday-card and cat touches; slightly generic intro.",
+      "blind_label": "C"
+     }
+    }
+   },
+   "storyscope": {
+    "lint": {
+     "words": 231,
+     "em_dash": 1,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 0,
+     "per_100w": 0.43
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 9,
+      "human": 8,
+      "specific": 8,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 1,
+      "note": "Real voice; five $2 coins is a clever, accurate weight cue; two-person workshop made tangible.",
+      "blind_label": "B"
+     },
+     "sonnet-judge": {
+      "job": 9,
+      "human": 9,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 80,
+      "rank": 1,
+      "note": "Distinct maker voice, five $2 coins detail, dry humour, real purchase confidence.",
+      "blind_label": "B"
+     }
+    }
+   }
+  },
+  "sales-2": {
+   "baseline": {
+    "lint": {
+     "words": 267,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 2,
+     "per_100w": 0.75
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 8,
+      "specific": 9,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 1,
+      "note": "Vivid trade detail (levelling before tiler, skirting, sample task text); good P.S.; drywall/skirting mix minor.",
+      "blind_label": "D"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 8,
+      "overall": 8,
+      "p_human": 55,
+      "rank": 1,
+      "note": "Specific scenario, real task examples, tight length, regional spelling; best hook and trial ask.",
+      "blind_label": "D"
+     }
+    }
+   },
+   "writing-skill": {
+    "lint": {
+     "words": 259,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 2,
+     "per_100w": 0.77
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 6,
+      "human": 5,
+      "specific": 5,
+      "overall": 5,
+      "p_human": 35,
+      "rank": 4,
+      "note": "Competent but templated: bullet list, 'things that matter on a real job', generic reply-to-us close.",
+      "blind_label": "B"
+     },
+     "sonnet-judge": {
+      "job": 6,
+      "human": 5,
+      "specific": 5,
+      "overall": 5,
+      "p_human": 30,
+      "rank": 4,
+      "note": "Competent but generic; bulleted feature list, plain, no memorable voice.",
+      "blind_label": "A"
+     }
+    }
+   },
+   "merged": {
+    "lint": {
+     "words": 266,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 0,
+     "stock_words": 0,
+     "punch_paras": 3,
+     "per_100w": 1.13
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 7,
+      "specific": 6,
+      "overall": 6,
+      "p_human": 50,
+      "rank": 3,
+      "note": "Clean, plainspoken, confident close; scenario fairly stock, little texture beyond cracked tile and coffee.",
+      "blind_label": "A"
+     },
+     "sonnet-judge": {
+      "job": 7,
+      "human": 6,
+      "specific": 6,
+      "overall": 6,
+      "p_human": 40,
+      "rank": 3,
+      "note": "Clean and credible; nice 'keep the group chat' close, but somewhat formulaic.",
+      "blind_label": "B"
+     }
+    }
+   },
+   "storyscope": {
+    "lint": {
+     "words": 279,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 3,
+     "per_100w": 1.43
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 8,
+      "overall": 8,
+      "p_human": 55,
+      "rank": 2,
+      "note": "Strong subject hook, Marco detail, cost-vs-return-trip logic; coffee joke and wrong-room line slightly tidy.",
+      "blind_label": "C"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 7,
+      "overall": 7,
+      "p_human": 50,
+      "rank": 2,
+      "note": "Strong hook, named crew member, PS useful; coffee joke and pricing quip slightly cute.",
+      "blind_label": "C"
+     }
+    }
+   }
+  },
+  "story-1": {
+   "baseline": {
+    "lint": {
+     "words": 1163,
+     "em_dash": 1,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 9,
+     "per_100w": 0.95
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 5,
+      "specific": 7,
+      "overall": 7,
+      "p_human": 30,
+      "rank": 4,
+      "note": "Moving premise, but triads, aphorisms ('That's a history') and lyrical flame ending feel staged.",
+      "blind_label": "B"
+     },
+     "sonnet-judge": {
+      "job": 7,
+      "human": 4,
+      "specific": 6,
+      "overall": 5,
+      "p_human": 28,
+      "rank": 4,
+      "note": "Polished but staged profundity, 'grammar of nights' framing, tidy ending; January-first detail strong.",
+      "blind_label": "C"
+     }
+    },
+    "storyscope": {
+     "file": "baseline.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 0.1365,
+     "ai_tells_narrative": [
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "mid_story_twist",
+       "push": -1.206
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.782
+      },
+      {
+       "feature": "AGENT_ATTR_001",
+       "name": "Dominant mode of introducing the central character",
+       "value": "external description (appearance/background summary)",
+       "push": -0.682
+      },
+      {
+       "feature": "AGENT_ATTR_005",
+       "name": "Primary technique for rendering inner life",
+       "value": "summary thought-report in narrator's voice",
+       "push": -0.616
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.559
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.505
+      }
+     ],
+     "p_human_full": 0.7275,
+     "ai_tells_full": [
+      {
+       "feature": "STY_CPX_012",
+       "name": "Sentence-structure repertoire",
+       "value": [
+        "frequent_fragments_or_elliptical_clauses",
+        "frequent_parallel_or_list-like_structures"
+       ],
+       "push": -1.216
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "mid_story_twist",
+       "push": -1.203
+      },
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -1.192
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.696
+      },
+      {
+       "feature": "SOC_REL_007",
+       "name": "Range of Relationship Types Present",
+       "value": [
+        "professional_or_economic"
+       ],
+       "push": -0.523
+      },
+      {
+       "feature": "STY_CPX_003",
+       "name": "Use of Sentence Fragments",
+       "value": "present_and_stylistically_significant",
+       "push": -0.5
+      }
+     ],
+     "ai_default_index": 0.17
+    }
+   },
+   "writing-skill": {
+    "lint": {
+     "words": 1244,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 5,
+     "stock_words": 0,
+     "punch_paras": 4,
+     "per_100w": 0.72
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 9,
+      "human": 8,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 62,
+      "rank": 2,
+      "note": "Restrained NICU story, real suspense in missed week; quiet 'plenty of ones' ending lands.",
+      "blind_label": "D"
+     },
+     "sonnet-judge": {
+      "job": 7,
+      "human": 6,
+      "specific": 7,
+      "overall": 6,
+      "p_human": 50,
+      "rank": 3,
+      "note": "Competent NICU story, moving but predictable and neatly resolved; some sentimental tidiness.",
+      "blind_label": "B"
+     }
+    },
+    "storyscope": {
+     "file": "writing-skill.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 0.9977,
+     "ai_tells_narrative": [
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "mid_story_twist",
+       "push": -1.019
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 1,
+       "push": -0.919
+      },
+      {
+       "feature": "TMP_DUR_009",
+       "name": "Density of Explicit Time Markers",
+       "value": 5,
+       "push": -0.77
+      },
+      {
+       "feature": "TMP_DUR_008",
+       "name": "Precision of temporal anchoring",
+       "value": "4_exact_calendar_dates_and_clock_times",
+       "push": -0.616
+      },
+      {
+       "feature": "AGENT_EMO_002",
+       "name": "Modes of conveying the central character's emotions",
+       "value": [
+        "actions and choices as emotional indicators",
+        "dialogue content or tone revealing emotion"
+       ],
+       "push": -0.587
+      },
+      {
+       "feature": "PER_DIA_001",
+       "name": "Dialogue-to-narration proportion",
+       "value": 2,
+       "push": -0.531
+      }
+     ],
+     "p_human_full": 1.0,
+     "ai_tells_full": [
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 1,
+       "push": -1.089
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "mid_story_twist",
+       "push": -0.94
+      },
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -0.789
+      },
+      {
+       "feature": "TMP_DUR_009",
+       "name": "Density of Explicit Time Markers",
+       "value": 5,
+       "push": -0.77
+      },
+      {
+       "feature": "REV_SUR_003",
+       "name": "Depth of Recontextualization After Surprise",
+       "value": 2,
+       "push": -0.402
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.34
+      }
+     ],
+     "ai_default_index": 0.07
+    }
+   },
+   "merged": {
+    "lint": {
+     "words": 1300,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 5,
+     "per_100w": 0.46
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 9,
+      "human": 9,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 72,
+      "rank": 1,
+      "note": "Receipt-list puzzle, wry narrator, funny ensemble; Manila video-call reveal earns warmth without moralizing.",
+      "blind_label": "A"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 7,
+      "specific": 8,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 2,
+      "note": "Lively voice, running number list, Luis's zero fix; slightly loose ending but charming.",
+      "blind_label": "D"
+     }
+    },
+    "storyscope": {
+     "file": "merged.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 1.0,
+     "ai_tells_narrative": [
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.85
+      },
+      {
+       "feature": "SET_LOC_011",
+       "name": "Location Variety Scope",
+       "value": "1_single_primary_location",
+       "push": -0.564
+      },
+      {
+       "feature": "SET_TIM_016",
+       "name": "Temporal Scaffolding Complexity",
+       "value": 1,
+       "push": -0.442
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.417
+      },
+      {
+       "feature": "AGENT_ATTR_021",
+       "name": "Dominant trajectories of main character change",
+       "value": [
+        "moral_learning_or_increased_empathy"
+       ],
+       "push": -0.402
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.36
+      }
+     ],
+     "p_human_full": 1.0,
+     "ai_tells_full": [
+      {
+       "feature": "STY_CPX_012",
+       "name": "Sentence-structure repertoire",
+       "value": [
+        "frequent_parallel_or_list-like_structures"
+       ],
+       "push": -0.979
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.762
+      },
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -0.692
+      },
+      {
+       "feature": "SET_TIM_016",
+       "name": "Temporal Scaffolding Complexity",
+       "value": 1,
+       "push": -0.574
+      },
+      {
+       "feature": "SOC_REL_007",
+       "name": "Range of Relationship Types Present",
+       "value": [
+        "familial_kinship",
+        "friendship_or_peer",
+        "professional_or_economic",
+        "communal_or_neighborly"
+       ],
+       "push": -0.394
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.382
+      }
+     ],
+     "ai_default_index": 0.03
+    }
+   },
+   "storyscope": {
+    "lint": {
+     "words": 1178,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 4,
+     "per_100w": 0.42
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 9,
+      "specific": 9,
+      "overall": 8,
+      "p_human": 68,
+      "rank": 3,
+      "note": "Deflating survey twist is clever, Mucinex-box bet great; reveal slightly gimmicky, ending dry and sharp.",
+      "blind_label": "C"
+     },
+     "sonnet-judge": {
+      "job": 9,
+      "human": 8,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 72,
+      "rank": 1,
+      "note": "Funny, surprising survey-receipt twist; vivid night-shift texture; deflates sentimentality cleverly.",
+      "blind_label": "A"
+     }
+    },
+    "storyscope": {
+     "file": "storyscope.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 1.0,
+     "ai_tells_narrative": [
+      {
+       "feature": "REV_SUR_006",
+       "name": "Function of Dramatic Irony",
+       "value": [
+        "humor_or_satire"
+       ],
+       "push": -0.482
+      },
+      {
+       "feature": "AGENT_ATTR_021",
+       "name": "Dominant trajectories of main character change",
+       "value": [
+        "moral_learning_or_increased_empathy"
+       ],
+       "push": -0.459
+      },
+      {
+       "feature": "SET_TIM_016",
+       "name": "Temporal Scaffolding Complexity",
+       "value": 1,
+       "push": -0.45
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.441
+      },
+      {
+       "feature": "SOC_REL_007",
+       "name": "Range of Relationship Types Present",
+       "value": [
+        "friendship_or_peer",
+        "professional_or_economic",
+        "communal_or_neighborly"
+       ],
+       "push": -0.432
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.418
+      }
+     ],
+     "p_human_full": 1.0,
+     "ai_tells_full": [
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -0.771
+      },
+      {
+       "feature": "SET_TIM_016",
+       "name": "Temporal Scaffolding Complexity",
+       "value": 1,
+       "push": -0.62
+      },
+      {
+       "feature": "SOC_STR_010",
+       "name": "Individualization of Community",
+       "value": "mostly_individualized_side_characters",
+       "push": -0.392
+      },
+      {
+       "feature": "STY_CPX_003",
+       "name": "Use of Sentence Fragments",
+       "value": "present_and_stylistically_significant",
+       "push": -0.369
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.336
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.333
+      }
+     ],
+     "ai_default_index": 0.0
+    }
+   }
+  },
+  "story-2": {
+   "baseline": {
+    "lint": {
+     "words": 1164,
+     "em_dash": 6,
+     "not_x_but_y": 0,
+     "triad": 2,
+     "stock_words": 0,
+     "punch_paras": 13,
+     "per_100w": 1.8
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 4,
+      "specific": 7,
+      "overall": 6,
+      "p_human": 20,
+      "rank": 4,
+      "note": "Repair tags are a strong conceit, but simile clusters, staged epiphany and tidy grease-to-the-wrist reconciliation feel manufactured.",
+      "blind_label": "C"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 5,
+      "specific": 7,
+      "overall": 6,
+      "p_human": 30,
+      "rank": 3,
+      "note": "Strong tag conceit but tidy bike-chain reconciliation, motif repetition, polished staged dialogue.",
+      "blind_label": "A"
+     }
+    },
+    "storyscope": {
+     "file": "baseline.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 0.6123,
+     "ai_tells_narrative": [
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.963
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "no_twist",
+       "push": -0.798
+      },
+      {
+       "feature": "SET_LOC_011",
+       "name": "Location Variety Scope",
+       "value": "1_single_primary_location",
+       "push": -0.652
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.55
+      },
+      {
+       "feature": "AGENT_EMO_002",
+       "name": "Modes of conveying the central character's emotions",
+       "value": [
+        "actions and choices as emotional indicators",
+        "dialogue content or tone revealing emotion"
+       ],
+       "push": -0.525
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.51
+      }
+     ],
+     "p_human_full": 0.0079,
+     "ai_tells_full": [
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -1.541
+      },
+      {
+       "feature": "STY_CPX_012",
+       "name": "Sentence-structure repertoire",
+       "value": [
+        "frequent_fragments_or_elliptical_clauses",
+        "frequent_parallel_or_list-like_structures"
+       ],
+       "push": -1.357
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "no_twist",
+       "push": -1.076
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.921
+      },
+      {
+       "feature": "STY_CPX_003",
+       "name": "Use of Sentence Fragments",
+       "value": "present_and_stylistically_significant",
+       "push": -0.695
+      },
+      {
+       "feature": "SOC_REL_007",
+       "name": "Range of Relationship Types Present",
+       "value": [
+        "familial_kinship",
+        "communal_or_neighborly"
+       ],
+       "push": -0.635
+      }
+     ],
+     "ai_default_index": 0.2
+    }
+   },
+   "writing-skill": {
+    "lint": {
+     "words": 1213,
+     "em_dash": 0,
+     "not_x_but_y": 0,
+     "triad": 2,
+     "stock_words": 0,
+     "punch_paras": 11,
+     "per_100w": 1.07
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 7,
+      "human": 8,
+      "specific": 7,
+      "overall": 7,
+      "p_human": 65,
+      "rank": 3,
+      "note": "Quiet, controlled, believable dialogue; bunk bed is apt. Low stakes, ending slightly neat, drifts toward familiar beats.",
+      "blind_label": "A"
+     },
+     "sonnet-judge": {
+      "job": 6,
+      "human": 6,
+      "specific": 6,
+      "overall": 5,
+      "p_human": 50,
+      "rank": 4,
+      "note": "Competent, plain, believable; flatter stakes, familiar beats, gentle reconciliation ending.",
+      "blind_label": "C"
+     }
+    },
+    "storyscope": {
+     "file": "writing-skill.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 0.9945,
+     "ai_tells_narrative": [
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.971
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "no_twist",
+       "push": -0.804
+      },
+      {
+       "feature": "TMP_DUR_008",
+       "name": "Precision of temporal anchoring",
+       "value": "4_exact_calendar_dates_and_clock_times",
+       "push": -0.591
+      },
+      {
+       "feature": "AGENT_EMO_002",
+       "name": "Modes of conveying the central character's emotions",
+       "value": [
+        "actions and choices as emotional indicators",
+        "dialogue content or tone revealing emotion"
+       ],
+       "push": -0.59
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.486
+      },
+      {
+       "feature": "AGENT_EMO_003",
+       "name": "Complexity of emotional arc",
+       "value": "some distinct shifts",
+       "push": -0.442
+      }
+     ],
+     "p_human_full": 0.9985,
+     "ai_tells_full": [
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "no_twist",
+       "push": -0.922
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.814
+      },
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -0.716
+      },
+      {
+       "feature": "SET_TIM_015",
+       "name": "Temporal Setting Specificity",
+       "value": "contemporary_realistic",
+       "push": -0.423
+      },
+      {
+       "feature": "REV_SUR_003",
+       "name": "Depth of Recontextualization After Surprise",
+       "value": 2,
+       "push": -0.41
+      },
+      {
+       "feature": "AGENT_EMO_002",
+       "name": "Modes of conveying the central character's emotions",
+       "value": [
+        "actions and choices as emotional indicators",
+        "dialogue content or tone revealing emotion"
+       ],
+       "push": -0.369
+      }
+     ],
+     "ai_default_index": 0.07
+    }
+   },
+   "merged": {
+    "lint": {
+     "words": 1218,
+     "em_dash": 2,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 17,
+     "per_100w": 1.64
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 8,
+      "human": 8,
+      "specific": 9,
+      "overall": 8,
+      "p_human": 60,
+      "rank": 2,
+      "note": "Ledger gives real conflict; MISC/GOOD is lovely; unresolved ending earns it. Brand-name density sometimes feels deployed.",
+      "blind_label": "D"
+     },
+     "sonnet-judge": {
+      "job": 8,
+      "human": 8,
+      "specific": 9,
+      "overall": 8,
+      "p_human": 72,
+      "rank": 2,
+      "note": "Ledger reveal and Munchkins, Hector details feel lived; ending quiet, unresolved well.",
+      "blind_label": "B"
+     }
+    },
+    "storyscope": {
+     "file": "merged.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 0.9694,
+     "ai_tells_narrative": [
+      {
+       "feature": "EVT_SCH_002",
+       "name": "Arc Completeness Relative to Implied Plot",
+       "value": "partial_arc_with_cliffhanger_or_open_crisis",
+       "push": -1.27
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.921
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "mid_story_twist",
+       "push": -0.673
+      },
+      {
+       "feature": "TMP_ORD_002",
+       "name": "Anachrony intensity",
+       "value": "1_no_real_anachrony",
+       "push": -0.582
+      },
+      {
+       "feature": "AGENT_ATTR_005",
+       "name": "Primary technique for rendering inner life",
+       "value": "summary thought-report in narrator's voice",
+       "push": -0.45
+      },
+      {
+       "feature": "SIT_MET_202",
+       "name": "Intertextual Strategy Types",
+       "value": [],
+       "push": -0.441
+      }
+     ],
+     "p_human_full": 0.9071,
+     "ai_tells_full": [
+      {
+       "feature": "EVT_SCH_002",
+       "name": "Arc Completeness Relative to Implied Plot",
+       "value": "partial_arc_with_cliffhanger_or_open_crisis",
+       "push": -1.379
+      },
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_neutral_conversational_standard",
+       "push": -1.133
+      },
+      {
+       "feature": "STY_CPX_012",
+       "name": "Sentence-structure repertoire",
+       "value": [
+        "frequent_parallel_or_list-like_structures"
+       ],
+       "push": -1.018
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.786
+      },
+      {
+       "feature": "REV_SUR_007",
+       "name": "Twist Placement Pattern",
+       "value": "mid_story_twist",
+       "push": -0.727
+      },
+      {
+       "feature": "TMP_ORD_002",
+       "name": "Anachrony intensity",
+       "value": "1_no_real_anachrony",
+       "push": -0.517
+      }
+     ],
+     "ai_default_index": 0.07
+    }
+   },
+   "storyscope": {
+    "lint": {
+     "words": 1155,
+     "em_dash": 2,
+     "not_x_but_y": 0,
+     "triad": 1,
+     "stock_words": 0,
+     "punch_paras": 14,
+     "per_100w": 1.47
+    },
+    "judges": {
+     "opus-judge": {
+      "job": 9,
+      "human": 9,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 75,
+      "rank": 1,
+      "note": "Voicey, funny, very particular Australian texture; undercuts the letters trope; mysterious payer gives an open, haunting ending.",
+      "blind_label": "B"
+     },
+     "sonnet-judge": {
+      "job": 9,
+      "human": 9,
+      "specific": 9,
+      "overall": 9,
+      "p_human": 82,
+      "rank": 1,
+      "note": "Distinct Australian voice, subverted letters trope, unexplained February payment, wry unresolved ending.",
+      "blind_label": "D"
+     }
+    },
+    "storyscope": {
+     "file": "storyscope.features.json",
+     "coverage": 1.0,
+     "p_human_narrative": 0.9993,
+     "ai_tells_narrative": [
+      {
+       "feature": "EVT_SCH_002",
+       "name": "Arc Completeness Relative to Implied Plot",
+       "value": "partial_arc_with_cliffhanger_or_open_crisis",
+       "push": -1.513
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.646
+      },
+      {
+       "feature": "TMP_ORD_002",
+       "name": "Anachrony intensity",
+       "value": "1_no_real_anachrony",
+       "push": -0.633
+      },
+      {
+       "feature": "REV_SUR_003",
+       "name": "Depth of Recontextualization After Surprise",
+       "value": 2,
+       "push": -0.448
+      },
+      {
+       "feature": "SET_LOC_011",
+       "name": "Location Variety Scope",
+       "value": "1_single_primary_location",
+       "push": -0.44
+      },
+      {
+       "feature": "SET_TIM_016",
+       "name": "Temporal Scaffolding Complexity",
+       "value": 1,
+       "push": -0.429
+      }
+     ],
+     "p_human_full": 0.9996,
+     "ai_tells_full": [
+      {
+       "feature": "EVT_SCH_002",
+       "name": "Arc Completeness Relative to Implied Plot",
+       "value": "partial_arc_with_cliffhanger_or_open_crisis",
+       "push": -1.426
+      },
+      {
+       "feature": "STY_ALL_015",
+       "name": "Lexical register and consistency",
+       "value": "consistently_colloquial_or_slangy",
+       "push": -1.112
+      },
+      {
+       "feature": "EVT_CAU_017",
+       "name": "Event Novelty Orientation",
+       "value": 2,
+       "push": -0.629
+      },
+      {
+       "feature": "REV_SUR_003",
+       "name": "Depth of Recontextualization After Surprise",
+       "value": 2,
+       "push": -0.415
+      },
+      {
+       "feature": "TMP_ORD_002",
+       "name": "Anachrony intensity",
+       "value": "1_no_real_anachrony",
+       "push": -0.41
+      },
+      {
+       "feature": "STY_CPX_003",
+       "name": "Use of Sentence Fragments",
+       "value": "present_and_stylistically_significant",
+       "push": -0.328
+      }
+     ],
+     "ai_default_index": 0.0
+    }
+   }
+  }
+ },
+ "human_reviewers": 0,
+ "overall": {
+  "baseline": {
+   "judge_overall": 5.92,
+   "firsts": 2,
+   "judgements": 12
+  },
+  "writing-skill": {
+   "judge_overall": 5.92,
+   "firsts": 0,
+   "judgements": 12
+  },
+  "merged": {
+   "judge_overall": 7.67,
+   "firsts": 1,
+   "judgements": 12
+  },
+  "storyscope": {
+   "judge_overall": 8.5,
+   "firsts": 9,
+   "judgements": 12
+  }
+ },
+ "ranking": [
+  "storyscope",
+  "merged",
+  "baseline",
+  "writing-skill"
+ ],
+ "winner_by_genre": {
+  "journal": "storyscope",
+  "sales": "storyscope",
+  "story": "storyscope"
+ }
+}

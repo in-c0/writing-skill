@@ -1,0 +1,85 @@
+{
+ "file": "merged.features.json",
+ "coverage": 1.0,
+ "p_human_narrative": 0.9694,
+ "ai_tells_narrative": [
+  {
+   "feature": "EVT_SCH_002",
+   "name": "Arc Completeness Relative to Implied Plot",
+   "value": "partial_arc_with_cliffhanger_or_open_crisis",
+   "push": -1.27
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 2,
+   "push": -0.921
+  },
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "mid_story_twist",
+   "push": -0.673
+  },
+  {
+   "feature": "TMP_ORD_002",
+   "name": "Anachrony intensity",
+   "value": "1_no_real_anachrony",
+   "push": -0.582
+  },
+  {
+   "feature": "AGENT_ATTR_005",
+   "name": "Primary technique for rendering inner life",
+   "value": "summary thought-report in narrator's voice",
+   "push": -0.45
+  },
+  {
+   "feature": "SIT_MET_202",
+   "name": "Intertextual Strategy Types",
+   "value": [],
+   "push": -0.441
+  }
+ ],
+ "p_human_full": 0.9071,
+ "ai_tells_full": [
+  {
+   "feature": "EVT_SCH_002",
+   "name": "Arc Completeness Relative to Implied Plot",
+   "value": "partial_arc_with_cliffhanger_or_open_crisis",
+   "push": -1.379
+  },
+  {
+   "feature": "STY_ALL_015",
+   "name": "Lexical register and consistency",
+   "value": "consistently_neutral_conversational_standard",
+   "push": -1.133
+  },
+  {
+   "feature": "STY_CPX_012",
+   "name": "Sentence-structure repertoire",
+   "value": [
+    "frequent_parallel_or_list-like_structures"
+   ],
+   "push": -1.018
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 2,
+   "push": -0.786
+  },
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "mid_story_twist",
+   "push": -0.727
+  },
+  {
+   "feature": "TMP_ORD_002",
+   "name": "Anachrony intensity",
+   "value": "1_no_real_anachrony",
+   "push": -0.517
+  }
+ ],
+ "ai_default_index": 0.07
+}

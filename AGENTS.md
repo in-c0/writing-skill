@@ -30,3 +30,9 @@ Do not routinely generate several workflow variants when the user asked for one 
 For experimental iterative review, preserve the baseline draft, make only corrections justified by a real reader-facing problem, allow a rule check to conclude that no change is needed, and periodically reread the whole passage so local edits do not destroy global voice or flow.
 
 Specific user instructions override the defaults in this repository.
+
+## Installable skills and the benchmark
+
+`skills/` holds the installable skill folders. `skills/storyscope/` is hand-maintained; `skills/writing-skill/` and `skills/writing-skill-storyscope/` are built from the root rulebook and `skills/_src/` by `python scripts/build_skills.py`, so edit the sources and rebuild rather than editing the built copies.
+
+`benchmark/` holds the comparison of the skills. After adding outputs, judge files or human reviews, run `python benchmark/tools/aggregate.py` to refresh `results.json` and the tables in `README.md` and `benchmark/BENCHMARK.md`.

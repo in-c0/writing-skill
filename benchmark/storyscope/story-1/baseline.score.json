@@ -1,0 +1,88 @@
+{
+ "file": "baseline.features.json",
+ "coverage": 1.0,
+ "p_human_narrative": 0.1365,
+ "ai_tells_narrative": [
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "mid_story_twist",
+   "push": -1.206
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 2,
+   "push": -0.782
+  },
+  {
+   "feature": "AGENT_ATTR_001",
+   "name": "Dominant mode of introducing the central character",
+   "value": "external description (appearance/background summary)",
+   "push": -0.682
+  },
+  {
+   "feature": "AGENT_ATTR_005",
+   "name": "Primary technique for rendering inner life",
+   "value": "summary thought-report in narrator's voice",
+   "push": -0.616
+  },
+  {
+   "feature": "SIT_MET_202",
+   "name": "Intertextual Strategy Types",
+   "value": [],
+   "push": -0.559
+  },
+  {
+   "feature": "SET_TIM_015",
+   "name": "Temporal Setting Specificity",
+   "value": "contemporary_realistic",
+   "push": -0.505
+  }
+ ],
+ "p_human_full": 0.7275,
+ "ai_tells_full": [
+  {
+   "feature": "STY_CPX_012",
+   "name": "Sentence-structure repertoire",
+   "value": [
+    "frequent_fragments_or_elliptical_clauses",
+    "frequent_parallel_or_list-like_structures"
+   ],
+   "push": -1.216
+  },
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "mid_story_twist",
+   "push": -1.203
+  },
+  {
+   "feature": "STY_ALL_015",
+   "name": "Lexical register and consistency",
+   "value": "consistently_neutral_conversational_standard",
+   "push": -1.192
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 2,
+   "push": -0.696
+  },
+  {
+   "feature": "SOC_REL_007",
+   "name": "Range of Relationship Types Present",
+   "value": [
+    "professional_or_economic"
+   ],
+   "push": -0.523
+  },
+  {
+   "feature": "STY_CPX_003",
+   "name": "Use of Sentence Fragments",
+   "value": "present_and_stylistically_significant",
+   "push": -0.5
+  }
+ ],
+ "ai_default_index": 0.17
+}

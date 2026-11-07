@@ -1,0 +1,42 @@
+{
+ "storyscope": {
+  "job": 9,
+  "human": 8,
+  "specific": 9,
+  "overall": 9,
+  "p_human": 72,
+  "rank": 1,
+  "note": "Funny, surprising survey-receipt twist; vivid night-shift texture; deflates sentimentality cleverly.",
+  "blind_label": "A"
+ },
+ "writing-skill": {
+  "job": 7,
+  "human": 6,
+  "specific": 7,
+  "overall": 6,
+  "p_human": 50,
+  "rank": 3,
+  "note": "Competent NICU story, moving but predictable and neatly resolved; some sentimental tidiness.",
+  "blind_label": "B"
+ },
+ "baseline": {
+  "job": 7,
+  "human": 4,
+  "specific": 6,
+  "overall": 5,
+  "p_human": 28,
+  "rank": 4,
+  "note": "Polished but staged profundity, 'grammar of nights' framing, tidy ending; January-first detail strong.",
+  "blind_label": "C"
+ },
+ "merged": {
+  "job": 8,
+  "human": 7,
+  "specific": 8,
+  "overall": 8,
+  "p_human": 60,
+  "rank": 2,
+  "note": "Lively voice, running number list, Luis's zero fix; slightly loose ending but charming.",
+  "blind_label": "D"
+ }
+}
