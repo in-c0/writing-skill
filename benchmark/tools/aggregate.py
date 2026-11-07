@@ -83,6 +83,20 @@ def comp(c):
     return round(st.mean(xs), 2) if xs else None
 res["overall"] = {c: {"judge_overall": comp(c), "firsts": sum(res["per_genre"][g][c]["firsts"] for g in GENRES),
                       "judgements": sum(res["per_genre"][g][c]["n_judgements"] for g in GENRES)} for c in CFG}
+# neutral-rubric re-judging (judging-neutral/<brief>/*.json): same pieces, prompt never mentions AI
+neu = {c: {"all": [], "firsts": 0, **{g: [] for g in GENRES}, **{g + "_f": 0 for g in GENRES}} for c in CFG}
+for br in briefs:
+    for jf in sorted((B / "judging-neutral" / br["id"]).glob("*.json")):
+        for c, s in json.load(open(jf)).items():
+            if c in neu:
+                neu[c]["all"].append(s["overall"]); neu[c][br["genre"]].append(s["overall"]); neu[c]["firsts"] += s["rank"] == 1; neu[c][br["genre"] + "_f"] += s["rank"] == 1
+for c in CFG:
+    res["overall"][c]["neutral_overall"] = mean(neu[c]["all"])
+    res["overall"][c]["neutral_firsts"] = neu[c]["firsts"]
+    res["overall"][c]["neutral_judgements"] = len(neu[c]["all"])
+    for g in GENRES:
+        res["per_genre"][g][c]["neutral_overall"] = mean(neu[c][g])
+        res["per_genre"][g][c]["neutral_firsts"] = neu[c][g + "_f"]
 res["ranking"] = sorted(CFG, key=lambda c: -(res["overall"][c]["judge_overall"] or 0))
 res["winner_by_genre"] = {g: max(CFG, key=lambda c: res["per_genre"][g][c]["overall"] or 0) for g in GENRES}
 json.dump(res, open(B / "results.json", "w"), indent=1)
