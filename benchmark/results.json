@@ -64,7 +64,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 7,
+    "neutral_firsts": 0
    },
    "writing-skill": {
     "overall": 6,
@@ -80,7 +82,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 6,
+    "neutral_firsts": 0
    },
    "merged": {
     "overall": 8,
@@ -96,7 +100,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 7.25,
+    "neutral_firsts": 0
    },
    "storyscope": {
     "overall": 8.75,
@@ -112,7 +118,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 4,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 9,
+    "neutral_firsts": 4
    }
   },
   "sales": {
@@ -130,7 +138,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 2,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 7,
+    "neutral_firsts": 0
    },
    "writing-skill": {
     "overall": 5,
@@ -146,7 +156,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 5.25,
+    "neutral_firsts": 0
    },
    "merged": {
     "overall": 6.75,
@@ -162,7 +174,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 6.75,
+    "neutral_firsts": 0
    },
    "storyscope": {
     "overall": 8,
@@ -178,7 +192,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 2,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 8.5,
+    "neutral_firsts": 4
    }
   },
   "story": {
@@ -196,7 +212,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 7.75,
+    "neutral_firsts": 2
    },
    "writing-skill": {
     "overall": 6.75,
@@ -212,7 +230,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 0,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 7,
+    "neutral_firsts": 1
    },
    "merged": {
     "overall": 8.25,
@@ -228,7 +248,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 1,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 7.25,
+    "neutral_firsts": 0
    },
    "storyscope": {
     "overall": 8.75,
@@ -244,7 +266,9 @@
     "human_bws": null,
     "human_n": 0,
     "firsts": 3,
-    "n_judgements": 4
+    "n_judgements": 4,
+    "neutral_overall": 8,
+    "neutral_firsts": 1
    }
   }
  },
@@ -1765,22 +1789,34 @@
   "baseline": {
    "judge_overall": 5.92,
    "firsts": 2,
-   "judgements": 12
+   "judgements": 12,
+   "neutral_overall": 7.25,
+   "neutral_firsts": 2,
+   "neutral_judgements": 12
   },
   "writing-skill": {
    "judge_overall": 5.92,
    "firsts": 0,
-   "judgements": 12
+   "judgements": 12,
+   "neutral_overall": 6.08,
+   "neutral_firsts": 1,
+   "neutral_judgements": 12
   },
   "merged": {
    "judge_overall": 7.67,
    "firsts": 1,
-   "judgements": 12
+   "judgements": 12,
+   "neutral_overall": 7.08,
+   "neutral_firsts": 0,
+   "neutral_judgements": 12
   },
   "storyscope": {
    "judge_overall": 8.5,
    "firsts": 9,
-   "judgements": 12
+   "judgements": 12,
+   "neutral_overall": 8.5,
+   "neutral_firsts": 9,
+   "neutral_judgements": 12
   }
  },
  "ranking": [
