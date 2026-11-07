@@ -45,13 +45,30 @@ Scores are means over both judges and both briefs in the genre (1–10). "Judge 
 
 <!-- /BENCH:detail -->
 
+## Rubric check: neutral re-judging
+
+The main rubric asks judges whether a piece "reads like a skilled human wrote it, rather than generic AI prose (formulaic structure, staged profundity, metaphor clusters, tidy moral endings, slogan-ish triads)". That list overlaps with what the StoryScope skill tells the writer to avoid, so the rubric itself could favour StoryScope. To test this, the same 24 pieces were re-judged with a fresh shuffle and a neutral prompt that never mentions AI ("which would you publish, send or keep reading?", overall 1–10 and rank). Raw scores: `judging-neutral/`.
+
+| Setup | Main rubric avg | Neutral avg | Neutral 1st places | Neutral journal | Neutral sales | Neutral story |
+|---|---|---|---|---|---|---|
+| StoryScope only | 8.50 | **8.50** | **9/12** | 9.00 | 8.50 | 8.00 |
+| No skill (control) | 5.92 | 7.25 | 2/12 | 7.00 | 7.00 | 7.75 |
+| writing-skill + StoryScope | 7.67 | 7.08 | 0/12 | 7.25 | 6.75 | 7.25 |
+| writing-skill | 5.92 | 6.08 | 1/12 | 6.00 | 5.25 | 7.00 |
+
+What changed:
+
+- StoryScope's lead survives without the AI-tells wording: same average, same 9 of 12 first places, first in all 8 journal and sales judgements.
+- The control gains about 1.3 points once judges stop looking for AI tells, and the merged skill drops below it. The merged skill's advantage over the control came mostly from the rubric.
+- On short stories, StoryScope's home genre, the neutral judges barely separate it from the control (8.00 vs 7.75), and the control took 2 of 4 first places there. More samples are needed before claiming a fiction advantage.
+
 ## Files
 
 | What | Where |
 |---|---|
 | Briefs | [`briefs.json`](./briefs.json) |
 | Outputs | `outputs/<brief>/<setup>.md` — setups: `baseline` (no skill), `writing-skill`, `merged` (writing-skill + StoryScope), `storyscope` |
-| Judge scores and notes (unblinded, with the label each judge saw) | `judging/<brief>/{opus,sonnet}-judge.json` |
+| Judge scores and notes (unblinded, with the label each judge saw) | `judging/<brief>/{opus,sonnet}-judge.json`, neutral re-judging in `judging-neutral/` |
 | StoryScope annotations and classifier scores | `storyscope/<brief>/<setup>.{features,score}.json` |
 | Annotator calibration | `storyscope/calibration/` |
 | Human reviews | `human-reviews/*.json` |
