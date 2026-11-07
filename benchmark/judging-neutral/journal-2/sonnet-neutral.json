@@ -1,0 +1,26 @@
+{
+ "merged": {
+  "overall": 6,
+  "rank": 4,
+  "note": "Competent and honest, but plainer; generic detail, flat voice, quiet ending without much surprise.",
+  "blind_label": "A"
+ },
+ "writing-skill": {
+  "overall": 7,
+  "rank": 3,
+  "note": "Clear, credible, useful specifics and a decision framework; a bit tidy and report-like, less distinctive voice.",
+  "blind_label": "B"
+ },
+ "baseline": {
+  "overall": 8,
+  "rank": 2,
+  "note": "Warm, vivid, strong kelpie-man ending; slightly literary and polished, but emotionally resonant and very publishable.",
+  "blind_label": "C"
+ },
+ "storyscope": {
+  "overall": 9,
+  "rank": 1,
+  "note": "Distinctive funny voice, concrete details (Gary the blister, Gaytime), real stakes with Friday deferral deadline; ends sharply.",
+  "blind_label": "D"
+ }
+}

@@ -29,6 +29,7 @@ What came out of it:
 - **writing-skill alone removes the most surface tells but did not beat the control.** It had the lowest polish-lint score in every genre, and one judge summed up its product page as "clear and accurate but flat". Taking the AI polish out is not the same as putting a person in.
 - **The merged skill landed in between.** The reader-first rules pulled StoryScope's departures back toward plainness, which helped sales copy a little and cost the fiction some edge.
 - **The control won sales-2 (launch email) with both judges.** Short transactional copy is where the skills help least.
+- **Rubric check.** The scoring rubric names AI tells that StoryScope trains the writer to avoid, so all 24 pieces were re-judged with a neutral prompt that never mentions AI. StoryScope kept its 8.50 average and 9 of 12 first places, but the control rose to 7.25 and overtook the merged skill (7.08), and on short stories StoryScope and the control nearly tie (8.0 vs 7.75). Details in [BENCHMARK.md](./benchmark/BENCHMARK.md#rubric-check-neutral-re-judging).
 
 Each piece and every judge note is in [`benchmark/`](./benchmark/); the full breakdown, including the StoryScope classifier and the lint, is in [`benchmark/BENCHMARK.md`](./benchmark/BENCHMARK.md).
 

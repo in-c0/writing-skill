@@ -1,0 +1,26 @@
+{
+ "writing-skill": {
+  "overall": 6,
+  "rank": 4,
+  "note": "Competent, quiet, believable, but familiar beats and a tidy, low-stakes ending; bunk bed motif underused.",
+  "blind_label": "A"
+ },
+ "baseline": {
+  "overall": 8,
+  "rank": 1,
+  "note": "Strongest central image (tagged broken things, bike chain); earned, physical ending. Slightly neat and a few over-explained lines.",
+  "blind_label": "B"
+ },
+ "merged": {
+  "overall": 7,
+  "rank": 3,
+  "note": "Sharp ledger conflict and specific dialogue; ending is ambiguous and the junk-hauler scene feels rushed.",
+  "blind_label": "C"
+ },
+ "storyscope": {
+  "overall": 8,
+  "rank": 2,
+  "note": "Distinctive voice, dry humor, restrained grief; the mystery payment ending lands, though scenes feel slightly episodic.",
+  "blind_label": "D"
+ }
+}
