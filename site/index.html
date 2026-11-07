@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>writing-skill · StoryScope benchmark</title>
-<meta name="description" content="Agent skills that stop AI writing from sounding like AI. Blind-judged on journal posts, sales copy and short stories. Copy the prompt or install the skill.">
+<meta name="description" content="Read real writing samples from the same prompt, compare four agent skills, inspect a small blind benchmark, and try the prompts yourself.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%227%22 fill=%22%2316202e%22/%3E%3Cpath d=%22M7 20h18%22 stroke=%22%23d7263d%22 stroke-width=%223%22/%3E%3Cpath d=%22M8 13h16%22 stroke=%22%23edf0f3%22 stroke-width=%223%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,8 +15,8 @@
 <header class="top">
   <a class="brand" href="#">writing<span>-</span>skill</a>
   <nav>
-    <a href="#board">Results</a>
     <a href="#compare">Compare</a>
+    <a href="#board">Results</a>
     <a href="#arena">Judge</a>
     <a href="#get">Install</a>
   </nav>
@@ -26,36 +26,54 @@
 <main>
 <section class="hero">
   <div class="hero-copy">
-    <h1>Same brief, four setups.<br>Judges kept picking the one that stopped writing like AI.</h1>
-    <p class="lede">StoryScope maps where AI text clusters, measured on 61,575 stories by humans and five LLMs. Loaded as a skill, it took <b id="hero-firsts">9 of 12</b> blind first places across journal posts, sales copy and short stories.</p>
-    <div class="cmd" data-copy="npx skills add in-c0/writing-skill --skill storyscope -g">
-      <code><span class="dim">$</span> npx skills add in-c0/writing-skill --skill storyscope -g</code>
-      <button class="copy" aria-label="Copy install command">Copy</button>
-    </div>
-    <p class="hero-links"><a href="#prompts">Or copy it as a prompt</a> <a href="#arena">Judge 3 rounds yourself</a></p>
+    <p class="eyebrow">A writing experiment with the actual drafts</p>
+    <h1>Same prompt.<br>Which piece would you keep reading?</h1>
+    <p class="lede">Four setups wrote each of six briefs. Start by reading two anonymous openings. You can reveal the setups, inspect every draft, and see what the judges thought.</p>
+    <p class="hero-links"><a href="#compare">Read the full drafts</a> <a href="#board">See the benchmark</a> <a href="#prompts">Try a prompt yourself</a></p>
   </div>
-  <figure class="hero-demo" aria-label="Before and after example">
+  <div class="hero-demo" aria-label="Compare two anonymous writing samples">
     <div class="demo-head">
-      <div class="seg" role="tablist" id="demo-seg">
-        <button role="tab" data-v="baseline" aria-selected="true">No skill</button>
-        <button role="tab" data-v="storyscope" aria-selected="false">StoryScope</button>
+      <div>
+        <p class="demo-kicker">Read first. Reveal later.</p>
+        <h2 id="demo-title">First month as an indie developer</h2>
       </div>
-      <label class="switch"><input type="checkbox" id="demo-marks" checked><i></i>Mark AI tells</label>
+      <div class="seg" aria-label="Sample genre" id="demo-genres">
+        <button data-brief="journal-1" aria-pressed="true">Journal</button>
+        <button data-brief="sales-1" aria-pressed="false">Sales copy</button>
+        <button data-brief="story-1" aria-pressed="false">Fiction</button>
+      </div>
     </div>
-    <div class="demo-body sample" id="demo-body"></div>
-    <figcaption id="demo-cap">Sales copy brief · first lines</figcaption>
-  </figure>
+    <p class="demo-brief" id="demo-brief"></p>
+    <div class="demo-columns">
+      <article class="demo-column"><div class="demo-label">Version A</div><div class="demo-body sample" id="demo-a"></div><button class="btn ghost demo-vote" data-vote="baseline">I'd keep reading A</button></article>
+      <article class="demo-column"><div class="demo-label">Version B</div><div class="demo-body sample" id="demo-b"></div><button class="btn ghost demo-vote" data-vote="storyscope">I'd keep reading B</button></article>
+    </div>
+    <div class="demo-foot">
+      <p id="demo-reveal" role="status" aria-live="polite">Both are unedited model outputs from the same brief. Pick one to reveal the setups, or simply keep reading.</p>
+      <button class="text-button" id="demo-skip">Reveal without voting</button>
+      <a id="demo-full" href="#compare">Compare the full pieces</a>
+    </div>
+  </div>
+  <p class="proof-note"><strong><span id="hero-firsts">9 of 12</span> blind first places</strong> for StoryScope in this six-brief pilot, scored by two AI judges. <strong>Not a general performance guarantee.</strong> The neutral-rubric follow-up also gave it 9/12 first places, but the short-story averages were close (8.00 vs 7.75 for the control). <a href="#method">See the limits and source data</a>.</p>
 </section>
 
 <section id="board" class="board">
   <div class="sec-head">
     <h2>Results</h2>
-    <p>Two AI editors (Opus and Sonnet) scored every piece blind, 1–10. Six briefs, four setups, same model writing.</p>
+    <p>One writing model, six briefs, four setups. Two blind AI editors scored every piece from 1–10. This is an early comparison, not a population-level result.</p>
   </div>
   <div class="podium" id="podium"></div>
   <div class="table-wrap"><table id="board-table"></table></div>
+  <div class="neutral-check">
+    <div><h3>What happened when the judges stopped looking for AI tells?</h3><p>The same 24 drafts were scored again with a neutral prompt: which would you publish, send, or keep reading? StoryScope still averaged <strong>8.50</strong>, but the unassisted control climbed to <strong>7.25</strong>. On short stories, the gap was just <strong>8.00 vs 7.75</strong>, and the control won two of four first-place votes.</p></div>
+    <a href="https://github.com/in-c0/writing-skill/blob/feat/storyscope-benchmark/benchmark/BENCHMARK.md#rubric-check-neutral-re-judging" target="_blank" rel="noopener">Read the neutral re-judging</a>
+  </div>
   <details class="signals">
-    <summary>More signals: StoryScope classifier, polish lint, human picks</summary>
+    <summary>See every brief and each judge's first-place pick</summary>
+    <div id="brief-results"></div>
+  </details>
+  <details class="signals">
+    <summary>Other diagnostics (not measures of writing quality)</summary>
     <div id="signals"></div>
   </details>
 </section>
@@ -63,7 +81,7 @@
 <section id="compare" class="compare">
   <div class="sec-head">
     <h2>Read them side by side</h2>
-    <p>Full outputs, unedited. Turn on marks to see surface AI tells (em dashes, "not X but Y", triads, stock words, one-line punch paragraphs).</p>
+    <p>All 24 unedited outputs are here. Optional marks flag surface patterns, not mistakes or proof that a text is AI-written.</p>
   </div>
   <div class="cmp-bar">
     <div class="seg" role="tablist" id="genre-seg"></div>
@@ -80,15 +98,15 @@
 <section id="arena" class="arena">
   <div class="sec-head">
     <h2>Judge it yourself</h2>
-    <p>Three rounds, about a minute each. Four anonymous pieces per round: tap the best and the worst. Your picks join the human column of the leaderboard.</p>
+    <p>Three self-paced anonymous rounds. Read short excerpts or expand the full pieces, pick your best and worst, then compare your choices with the AI judges. Sharing is optional.</p>
   </div>
   <div id="arena-root" class="arena-root"></div>
 </section>
 
 <section id="prompts" class="prompts">
   <div class="sec-head">
-    <h2>Copy as a prompt</h2>
-    <p>No install needed. Paste into ChatGPT, Claude, Gemini or any chat, then add your task after the last line.</p>
+    <h2>Try it on your own brief</h2>
+    <p>No installation required. Copy one of the prompts into ChatGPT, Claude, Gemini or another chat, and add your writing task. The site does not run your text through a model.</p>
   </div>
   <div class="prompt-grid" id="prompt-grid"></div>
 </section>
@@ -96,7 +114,12 @@
 <section id="get" class="get">
   <div class="sec-head">
     <h2>Install the skill</h2>
-    <p>Three skills ship from one repo. Start with StoryScope; it led every genre in this round.</p>
+    <p>Three different approaches, not three required installs. Start with the one that fits what you're writing.</p>
+  </div>
+  <div class="skill-choice">
+    <p><strong>StoryScope:</strong> narrative fiction and story-driven nonfiction; draws on measured fiction patterns. The non-fiction guidance is a hypothesis, not a result of the original study.</p>
+    <p><strong>writing-skill:</strong> clear documentation, explanations and editing that preserves an existing voice.</p>
+    <p><strong>Combined:</strong> the reader-first rulebook with a StoryScope layer; an experimental option that did not consistently outperform the control here.</p>
   </div>
   <div class="seg" role="tablist" id="inst-seg">
     <button role="tab" data-t="cli" aria-selected="true">Claude Code &amp; other agents</button>
@@ -106,7 +129,10 @@
   <div class="inst" data-t="cli">
     <p>Uses the open <a href="https://skills.sh">skills.sh</a> installer, which works with Claude Code, Codex, Cursor and other agents that read <code>SKILL.md</code>.</p>
     <div class="cmd" data-copy="npx skills add in-c0/writing-skill --skill storyscope -g"><code><span class="dim">$</span> npx skills add in-c0/writing-skill --skill storyscope -g</code><button class="copy">Copy</button></div>
-    <div class="cmd" data-copy="npx skills add in-c0/writing-skill --skill writing-skill-storyscope -g"><code><span class="dim">$</span> npx skills add in-c0/writing-skill --skill writing-skill-storyscope -g</code><button class="copy">Copy</button></div>
+    <details class="other-installs"><summary>Other installs</summary>
+      <div class="cmd" data-copy="npx skills add in-c0/writing-skill --skill writing-skill -g"><code><span class="dim">$</span> npx skills add in-c0/writing-skill --skill writing-skill -g</code><button class="copy">Copy</button></div>
+      <div class="cmd" data-copy="npx skills add in-c0/writing-skill --skill writing-skill-storyscope -g"><code><span class="dim">$</span> npx skills add in-c0/writing-skill --skill writing-skill-storyscope -g</code><button class="copy">Copy</button></div>
+    </details>
     <p class="small">Drop <code>-g</code> to install into the current project only. Scoring a story needs <code>pip install xgboost numpy</code>.</p>
   </div>
   <div class="inst" data-t="app" hidden>
@@ -122,13 +148,13 @@
   </div>
 </section>
 
-<section class="method">
+<section class="method" id="method">
   <h2>How this was measured</h2>
   <div class="method-cols">
     <p>Six briefs: two journal posts, two pieces of sales copy, two short stories. Each brief was written four times by the same model in fresh sessions: no skill, writing-skill, writing-skill + StoryScope, and StoryScope alone. Two AI editors scored all four pieces per brief without knowing which was which. Stories were also annotated on the paper's 304 features and run through its released classifier.</p>
-    <p>This is a small, early benchmark: twelve judgements per setup, and the judges belong to the same model family as the writer. The classifier was trained on 5,000-word stories annotated by a different model, so its absolute numbers here are not comparable to the paper; read it as a relative signal. Human picks are what make the result trustworthy, which is why the judging rounds above exist.</p>
+    <p>This is a small, early benchmark: twelve judgements per setup, from judges in the writer's model family. The main rubric named AI tells that StoryScope was designed to avoid, which is why we also ran a neutral-rubric check. Self-selected human votes add perspectives but are not a representative sample. The original StoryScope study was on long-form fiction, not sales copy or journal posts, and its classifier was trained on ~5,000-word stories annotated by a different model. Its scores here are diagnostic comparisons, not authorship probabilities or writing-quality grades.</p>
   </div>
-  <p class="credit">StoryScope: Russell, Rajendhran, Pham, Iyyer, Wieting (2026), <a href="https://arxiv.org/abs/2604.03136">arXiv:2604.03136</a>, data and models under MIT. Code and every raw output: <a href="https://github.com/in-c0/writing-skill">github.com/in-c0/writing-skill</a>.</p>
+  <p class="credit">Research: Russell, Rajendhran, Pham, Iyyer, Wieting (2026), <a href="https://arxiv.org/abs/2604.03136">StoryScope</a> (61,608 stories in the corpus; 61,575 rows in the released feature table). This repository's writing guidance and benchmark are an independent application of that research, not an evaluation or endorsement by the paper's authors. <a href="https://github.com/in-c0/writing-skill/tree/feat/storyscope-benchmark/benchmark">Raw writing, scores and prompts</a> · <a href="https://github.com/jenna-russell/storyscope">Original research code</a>.</p>
 </section>
 </main>
 
