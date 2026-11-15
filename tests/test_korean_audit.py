@@ -10,7 +10,7 @@ class KoreanAuditTest(unittest.TestCase):
     def test_reports_line_and_column(self):
         results = audit("좋은 문장\n이 문제에 있어서 개선이 필요하다")
         self.assertEqual([(r["line"], r["column"], r["category"]) for r in results],
-                         [(2, 6, "translationese_location")])
+                         [(2, 5, "translationese_location")])
 
     def test_protected_blocks(self):
         source = (
