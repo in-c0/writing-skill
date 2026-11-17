@@ -1,0 +1,6 @@
+# The Vercel project only hosts the API. The rulebook and playground are served by Hugging Face.
+.git
+.github
+demo
+extensions
+*.md

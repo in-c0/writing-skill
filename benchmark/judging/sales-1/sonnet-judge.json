@@ -1,0 +1,42 @@
+{
+ "writing-skill": {
+  "job": 6,
+  "human": 5,
+  "specific": 5,
+  "overall": 5,
+  "p_human": 35,
+  "rank": 4,
+  "note": "Competent but bland; fills the brief, no voice, repetitive price and workshop mentions.",
+  "blind_label": "A"
+ },
+ "storyscope": {
+  "job": 9,
+  "human": 9,
+  "specific": 9,
+  "overall": 9,
+  "p_human": 80,
+  "rank": 1,
+  "note": "Distinct maker voice, five $2 coins detail, dry humour, real purchase confidence.",
+  "blind_label": "B"
+ },
+ "merged": {
+  "job": 8,
+  "human": 7,
+  "specific": 7,
+  "overall": 8,
+  "p_human": 60,
+  "rank": 2,
+  "note": "Warm and credible, nice birthday-card and cat touches; slightly generic intro.",
+  "blind_label": "C"
+ },
+ "baseline": {
+  "job": 6,
+  "human": 4,
+  "specific": 5,
+  "overall": 5,
+  "p_human": 25,
+  "rank": 3,
+  "note": "Slogan-ish headline and closer, tidy triads, polished but formulaic; less warmth.",
+  "blind_label": "D"
+ }
+}

@@ -1,0 +1,86 @@
+{
+ "file": "writing-skill.features.json",
+ "coverage": 1.0,
+ "p_human_narrative": 0.9977,
+ "ai_tells_narrative": [
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "mid_story_twist",
+   "push": -1.019
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 1,
+   "push": -0.919
+  },
+  {
+   "feature": "TMP_DUR_009",
+   "name": "Density of Explicit Time Markers",
+   "value": 5,
+   "push": -0.77
+  },
+  {
+   "feature": "TMP_DUR_008",
+   "name": "Precision of temporal anchoring",
+   "value": "4_exact_calendar_dates_and_clock_times",
+   "push": -0.616
+  },
+  {
+   "feature": "AGENT_EMO_002",
+   "name": "Modes of conveying the central character's emotions",
+   "value": [
+    "actions and choices as emotional indicators",
+    "dialogue content or tone revealing emotion"
+   ],
+   "push": -0.587
+  },
+  {
+   "feature": "PER_DIA_001",
+   "name": "Dialogue-to-narration proportion",
+   "value": 2,
+   "push": -0.531
+  }
+ ],
+ "p_human_full": 1.0,
+ "ai_tells_full": [
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 1,
+   "push": -1.089
+  },
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "mid_story_twist",
+   "push": -0.94
+  },
+  {
+   "feature": "STY_ALL_015",
+   "name": "Lexical register and consistency",
+   "value": "consistently_neutral_conversational_standard",
+   "push": -0.789
+  },
+  {
+   "feature": "TMP_DUR_009",
+   "name": "Density of Explicit Time Markers",
+   "value": 5,
+   "push": -0.77
+  },
+  {
+   "feature": "REV_SUR_003",
+   "name": "Depth of Recontextualization After Surprise",
+   "value": 2,
+   "push": -0.402
+  },
+  {
+   "feature": "SIT_MET_202",
+   "name": "Intertextual Strategy Types",
+   "value": [],
+   "push": -0.34
+  }
+ ],
+ "ai_default_index": 0.07
+}

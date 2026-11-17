@@ -1,0 +1,42 @@
+{
+ "merged": {
+  "job": 9,
+  "human": 9,
+  "specific": 9,
+  "overall": 9,
+  "p_human": 72,
+  "rank": 1,
+  "note": "Receipt-list puzzle, wry narrator, funny ensemble; Manila video-call reveal earns warmth without moralizing.",
+  "blind_label": "A"
+ },
+ "baseline": {
+  "job": 8,
+  "human": 5,
+  "specific": 7,
+  "overall": 7,
+  "p_human": 30,
+  "rank": 4,
+  "note": "Moving premise, but triads, aphorisms ('That's a history') and lyrical flame ending feel staged.",
+  "blind_label": "B"
+ },
+ "storyscope": {
+  "job": 8,
+  "human": 9,
+  "specific": 9,
+  "overall": 8,
+  "p_human": 68,
+  "rank": 3,
+  "note": "Deflating survey twist is clever, Mucinex-box bet great; reveal slightly gimmicky, ending dry and sharp.",
+  "blind_label": "C"
+ },
+ "writing-skill": {
+  "job": 9,
+  "human": 8,
+  "specific": 9,
+  "overall": 9,
+  "p_human": 62,
+  "rank": 2,
+  "note": "Restrained NICU story, real suspense in missed week; quiet 'plenty of ones' ending lands.",
+  "blind_label": "D"
+ }
+}

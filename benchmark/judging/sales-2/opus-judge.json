@@ -1,0 +1,42 @@
+{
+ "merged": {
+  "job": 7,
+  "human": 7,
+  "specific": 6,
+  "overall": 6,
+  "p_human": 50,
+  "rank": 3,
+  "note": "Clean, plainspoken, confident close; scenario fairly stock, little texture beyond cracked tile and coffee.",
+  "blind_label": "A"
+ },
+ "writing-skill": {
+  "job": 6,
+  "human": 5,
+  "specific": 5,
+  "overall": 5,
+  "p_human": 35,
+  "rank": 4,
+  "note": "Competent but templated: bullet list, 'things that matter on a real job', generic reply-to-us close.",
+  "blind_label": "B"
+ },
+ "storyscope": {
+  "job": 8,
+  "human": 7,
+  "specific": 8,
+  "overall": 8,
+  "p_human": 55,
+  "rank": 2,
+  "note": "Strong subject hook, Marco detail, cost-vs-return-trip logic; coffee joke and wrong-room line slightly tidy.",
+  "blind_label": "C"
+ },
+ "baseline": {
+  "job": 8,
+  "human": 8,
+  "specific": 9,
+  "overall": 8,
+  "p_human": 60,
+  "rank": 1,
+  "note": "Vivid trade detail (levelling before tiler, skirting, sample task text); good P.S.; drywall/skirting mix minor.",
+  "blind_label": "D"
+ }
+}
