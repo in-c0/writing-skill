@@ -1,0 +1,42 @@
+{
+ "storyscope": {
+  "job": 9,
+  "human": 7,
+  "specific": 9,
+  "overall": 8,
+  "p_human": 55,
+  "rank": 1,
+  "note": "Funniest, sharpest details (Dan's tip text, cafe order); a few aphoristic lines; mum/Mac joke slightly inconsistent.",
+  "blind_label": "A"
+ },
+ "writing-skill": {
+  "job": 7,
+  "human": 7,
+  "specific": 6,
+  "overall": 6,
+  "p_human": 50,
+  "rank": 3,
+  "note": "Sincere and plain, believable; flat voice, kettle clich\u00e9, tidy month-two resolution.",
+  "blind_label": "B"
+ },
+ "merged": {
+  "job": 8,
+  "human": 8,
+  "specific": 8,
+  "overall": 8,
+  "p_human": 60,
+  "rank": 2,
+  "note": "Natural, wry; curled card, 'ok' review, quiet CV update land; train/paddock metaphor slightly staged.",
+  "blind_label": "C"
+ },
+ "baseline": {
+  "job": 7,
+  "human": 4,
+  "specific": 6,
+  "overall": 5,
+  "p_human": 25,
+  "rank": 4,
+  "note": "Headered listicle structure, aphoristic closers ('silence gives you nothing to fix'), tidy lessons.",
+  "blind_label": "D"
+ }
+}

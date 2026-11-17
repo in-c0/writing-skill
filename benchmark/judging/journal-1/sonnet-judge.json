@@ -1,0 +1,42 @@
+{
+ "writing-skill": {
+  "job": 6,
+  "human": 6,
+  "specific": 6,
+  "overall": 6,
+  "p_human": 55,
+  "rank": 3,
+  "note": "Honest, plain, concrete numbers; competent but flat, tidy plan-for-month-two ending.",
+  "blind_label": "A"
+ },
+ "baseline": {
+  "job": 6,
+  "human": 4,
+  "specific": 5,
+  "overall": 5,
+  "p_human": 30,
+  "rank": 4,
+  "note": "Header-sectioned template structure, stated feelings, neat lessons; some nice lines but formulaic.",
+  "blind_label": "B"
+ },
+ "merged": {
+  "job": 8,
+  "human": 7,
+  "specific": 8,
+  "overall": 8,
+  "p_human": 65,
+  "rank": 2,
+  "note": "Lived-in details: curling card, 'ok' review, sunglasses bot; one train metaphor, tidy-ish close.",
+  "blind_label": "C"
+ },
+ "storyscope": {
+  "job": 9,
+  "human": 8,
+  "specific": 9,
+  "overall": 9,
+  "p_human": 75,
+  "rank": 1,
+  "note": "Distinct wry voice, named apps, Dan's texts, cafe order; a few polished punchlines.",
+  "blind_label": "D"
+ }
+}

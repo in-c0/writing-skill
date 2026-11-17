@@ -1,0 +1,26 @@
+{
+ "merged": {
+  "overall": 6,
+  "rank": 3,
+  "note": "Clear and competent with a nice closing line, but the hook is generic and the structure is predictable.",
+  "blind_label": "A"
+ },
+ "writing-skill": {
+  "overall": 5,
+  "rank": 4,
+  "note": "Accurate and tidy, but bland, bulleted, and reads like a template; little voice or memorable hook.",
+  "blind_label": "B"
+ },
+ "baseline": {
+  "overall": 7,
+  "rank": 2,
+  "note": "Vivid Tuesday-morning opening, concrete examples, good price framing; subject line slightly preachy, P.S. adds low-pressure adoption.",
+  "blind_label": "C"
+ },
+ "storyscope": {
+  "overall": 8,
+  "rank": 1,
+  "note": "Best subject line and hook, natural builder voice, humor, price framing, crew-onboarding P.S.; slightly long.",
+  "blind_label": "D"
+ }
+}

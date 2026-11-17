@@ -1,0 +1,42 @@
+{
+ "baseline": {
+  "job": 8,
+  "human": 5,
+  "specific": 7,
+  "overall": 6,
+  "p_human": 30,
+  "rank": 3,
+  "note": "Strong tag conceit but tidy bike-chain reconciliation, motif repetition, polished staged dialogue.",
+  "blind_label": "A"
+ },
+ "merged": {
+  "job": 8,
+  "human": 8,
+  "specific": 9,
+  "overall": 8,
+  "p_human": 72,
+  "rank": 2,
+  "note": "Ledger reveal and Munchkins, Hector details feel lived; ending quiet, unresolved well.",
+  "blind_label": "B"
+ },
+ "writing-skill": {
+  "job": 6,
+  "human": 6,
+  "specific": 6,
+  "overall": 5,
+  "p_human": 50,
+  "rank": 4,
+  "note": "Competent, plain, believable; flatter stakes, familiar beats, gentle reconciliation ending.",
+  "blind_label": "C"
+ },
+ "storyscope": {
+  "job": 9,
+  "human": 9,
+  "specific": 9,
+  "overall": 9,
+  "p_human": 82,
+  "rank": 1,
+  "note": "Distinct Australian voice, subverted letters trope, unexplained February payment, wry unresolved ending.",
+  "blind_label": "D"
+ }
+}

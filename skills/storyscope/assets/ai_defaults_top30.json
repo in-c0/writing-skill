@@ -1,0 +1,242 @@
+[
+ {
+  "id": "STY_FIG_001",
+  "name": "Figurative Device Density",
+  "ai_val": "4",
+  "hu_val": "3",
+  "tvd": 0.483,
+  "type": "scale"
+ },
+ {
+  "id": "AGENT_ATTR_024",
+  "name": "Density of figurative language in character depiction",
+  "ai_val": "4",
+  "hu_val": "2",
+  "tvd": 0.438,
+  "type": "scale"
+ },
+ {
+  "id": "SIT_MET_303",
+  "name": "Thematic Explicitness and Moralizing",
+  "ai_val": "4",
+  "hu_val": "3",
+  "tvd": 0.433,
+  "type": "scale"
+ },
+ {
+  "id": "STY_FIG_004",
+  "name": "Presence of extended conceit",
+  "ai_val": "present",
+  "hu_val": "absent",
+  "tvd": 0.429,
+  "type": "binary"
+ },
+ {
+  "id": "AGENT_EMO_009",
+  "name": "Dominant mode of emotional expression",
+  "ai_val": "embodied_sensations_and_metaphors",
+  "hu_val": "behavioral_cues_and_action_only",
+  "tvd": 0.42,
+  "type": "categorical"
+ },
+ {
+  "id": "AGENT_EMO_012",
+  "name": "Preferred cues for conveying emotional state",
+  "ai_val": "metaphorical or environmental mirroring (weather, setting, or images echoing mood)",
+  "hu_val": "action choices and behavior (e.g., slamming doors, withdrawing, calling someone)",
+  "tvd": 0.402,
+  "type": "multi_select"
+ },
+ {
+  "id": "AGENT_EMO_002",
+  "name": "Modes of conveying the central character's emotions",
+  "ai_val": "metaphorical or environmental imagery reflecting mood",
+  "hu_val": "dialogue content or tone revealing emotion",
+  "tvd": 0.391,
+  "type": "multi_select"
+ },
+ {
+  "id": "STY_ALL_015",
+  "name": "Lexical register and consistency",
+  "ai_val": "consistently_elevated_or_literary",
+  "hu_val": "mixed_register_with_frequent_code_switching",
+  "tvd": 0.375,
+  "type": "categorical"
+ },
+ {
+  "id": "PLT_MOR_007",
+  "name": "Post-Climax Denouement Length",
+  "ai_val": "extended (multiple scenes/time jumps of aftermath/epilogue)",
+  "hu_val": "brief (a short scene or paragraph of aftermath)",
+  "tvd": 0.365,
+  "type": "ordinal"
+ },
+ {
+  "id": "STY_TON_006",
+  "name": "Sound Patterning Prominence",
+  "ai_val": "noticeable",
+  "hu_val": "subtle_or_background",
+  "tvd": 0.358,
+  "type": "ordinal"
+ },
+ {
+  "id": "STY_FIG_003",
+  "name": "Conventional vs fresh figurative language",
+  "ai_val": "3 - predominantly_fresh_and_inventive_images",
+  "hu_val": "2 - mix_of_clich\u00e9_and_some_fresh_images",
+  "tvd": 0.343,
+  "type": "ordinal"
+ },
+ {
+  "id": "PLT_THM_008",
+  "name": "Thematic Unity",
+  "ai_val": "5",
+  "hu_val": "4",
+  "tvd": 0.332,
+  "type": "scale"
+ },
+ {
+  "id": "STY_TON_024",
+  "name": "Rhythmic markedness of prose",
+  "ai_val": "4",
+  "hu_val": "3",
+  "tvd": 0.329,
+  "type": "scale"
+ },
+ {
+  "id": "STY_TON_021",
+  "name": "Predominant tonal quality",
+  "ai_val": "earnest_or_lyrical",
+  "hu_val": "ironic_or_wry",
+  "tvd": 0.318,
+  "type": "categorical"
+ },
+ {
+  "id": "STY_CPX_012",
+  "name": "Sentence-structure repertoire",
+  "ai_val": "frequent_parallel_or_list-like_structures",
+  "hu_val": "frequent_loose_multi-clause_chains",
+  "tvd": 0.287,
+  "type": "multi_select"
+ },
+ {
+  "id": "STY_ALL_016",
+  "name": "Latinate vs Anglo-Saxon lexical flavor",
+  "ai_val": "3",
+  "hu_val": "2",
+  "tvd": 0.28,
+  "type": "scale"
+ },
+ {
+  "id": "STY_ALL_018",
+  "name": "Allusion domain diversity",
+  "ai_val": "self_referential_or_meta-textual",
+  "hu_val": "pop_culture_or_brand_names",
+  "tvd": 0.268,
+  "type": "multi_select"
+ },
+ {
+  "id": "STY_TON_029",
+  "name": "Information density per sentence",
+  "ai_val": "4",
+  "hu_val": "3",
+  "tvd": 0.268,
+  "type": "scale"
+ },
+ {
+  "id": "STY_FIG_005",
+  "name": "Recurrent metaphorical motif",
+  "ai_val": "present",
+  "hu_val": "absent",
+  "tvd": 0.267,
+  "type": "binary"
+ },
+ {
+  "id": "STY_TON_023",
+  "name": "Use of irony and humor",
+  "ai_val": "1 - entirely_straightfaced_no_discernible_humor",
+  "hu_val": "2 - occasional_light_humor_or_irony",
+  "tvd": 0.262,
+  "type": "ordinal"
+ },
+ {
+  "id": "STY_TON_001",
+  "name": "Dominant Tonal Register",
+  "ai_val": "lyrical_or_meditative",
+  "hu_val": "neutral_reportorial",
+  "tvd": 0.253,
+  "type": "categorical"
+ },
+ {
+  "id": "SET_ATM_017",
+  "name": "Dominant Sensory Modalities",
+  "ai_val": "olfactory",
+  "hu_val": "gustatory",
+  "tvd": 0.25,
+  "type": "multi_select"
+ },
+ {
+  "id": "SIT_MET_501",
+  "name": "Narratorial Thematic Commentary Presence",
+  "ai_val": "yes",
+  "hu_val": "no",
+  "tvd": 0.248,
+  "type": "binary"
+ },
+ {
+  "id": "PER_DIA_003",
+  "name": "Primary functions of dialogue",
+  "ai_val": "philosophical_or_thematic_debate",
+  "hu_val": "worldbuilding_or_background_exposition",
+  "tvd": 0.245,
+  "type": "multi_select"
+ },
+ {
+  "id": "PLT_MOR_004",
+  "name": "Protagonist Transformational Trajectory",
+  "ai_val": "positive_growth_or_enlightenment",
+  "hu_val": "no_significant_internal_change",
+  "tvd": 0.243,
+  "type": "categorical"
+ },
+ {
+  "id": "SIT_MET_301",
+  "name": "Perceived Literary Ambition in Prose Style",
+  "ai_val": "4",
+  "hu_val": "3",
+  "tvd": 0.242,
+  "type": "scale"
+ },
+ {
+  "id": "SET_ATM_022",
+  "name": "Setting as Psychological Mirror",
+  "ai_val": "5",
+  "hu_val": "3",
+  "tvd": 0.239,
+  "type": "scale"
+ },
+ {
+  "id": "AGENT_ID_002",
+  "name": "Secondary character density",
+  "ai_val": "few (2\u20133)",
+  "hu_val": "many (8 or more)",
+  "tvd": 0.238,
+  "type": "ordinal"
+ },
+ {
+  "id": "SET_LOC_002",
+  "name": "Spatial Granularity Level",
+  "ai_val": "4_high",
+  "hu_val": "3_medium",
+  "tvd": 0.236,
+  "type": "ordinal"
+ },
+ {
+  "id": "SET_ATM_005",
+  "name": "Sensory Density",
+  "ai_val": "4",
+  "hu_val": "3",
+  "tvd": 0.236,
+  "type": "scale"
+ }
+]

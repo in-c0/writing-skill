@@ -1,0 +1,89 @@
+{
+ "file": "writing-skill.features.json",
+ "coverage": 1.0,
+ "p_human_narrative": 0.9945,
+ "ai_tells_narrative": [
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 2,
+   "push": -0.971
+  },
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "no_twist",
+   "push": -0.804
+  },
+  {
+   "feature": "TMP_DUR_008",
+   "name": "Precision of temporal anchoring",
+   "value": "4_exact_calendar_dates_and_clock_times",
+   "push": -0.591
+  },
+  {
+   "feature": "AGENT_EMO_002",
+   "name": "Modes of conveying the central character's emotions",
+   "value": [
+    "actions and choices as emotional indicators",
+    "dialogue content or tone revealing emotion"
+   ],
+   "push": -0.59
+  },
+  {
+   "feature": "SET_TIM_015",
+   "name": "Temporal Setting Specificity",
+   "value": "contemporary_realistic",
+   "push": -0.486
+  },
+  {
+   "feature": "AGENT_EMO_003",
+   "name": "Complexity of emotional arc",
+   "value": "some distinct shifts",
+   "push": -0.442
+  }
+ ],
+ "p_human_full": 0.9985,
+ "ai_tells_full": [
+  {
+   "feature": "REV_SUR_007",
+   "name": "Twist Placement Pattern",
+   "value": "no_twist",
+   "push": -0.922
+  },
+  {
+   "feature": "EVT_CAU_017",
+   "name": "Event Novelty Orientation",
+   "value": 2,
+   "push": -0.814
+  },
+  {
+   "feature": "STY_ALL_015",
+   "name": "Lexical register and consistency",
+   "value": "consistently_neutral_conversational_standard",
+   "push": -0.716
+  },
+  {
+   "feature": "SET_TIM_015",
+   "name": "Temporal Setting Specificity",
+   "value": "contemporary_realistic",
+   "push": -0.423
+  },
+  {
+   "feature": "REV_SUR_003",
+   "name": "Depth of Recontextualization After Surprise",
+   "value": 2,
+   "push": -0.41
+  },
+  {
+   "feature": "AGENT_EMO_002",
+   "name": "Modes of conveying the central character's emotions",
+   "value": [
+    "actions and choices as emotional indicators",
+    "dialogue content or tone revealing emotion"
+   ],
+   "push": -0.369
+  }
+ ],
+ "ai_default_index": 0.07
+}
